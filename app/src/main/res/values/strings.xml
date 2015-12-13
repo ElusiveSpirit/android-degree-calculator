@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">DegreeCalculator</string>
+    <string name="degree">°</string>
+    <string name="minute">\'</string>
+</resources>
