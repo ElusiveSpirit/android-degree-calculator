@@ -29,15 +29,14 @@ public class DegreeInitTest {
     @Parameters
     public static Collection getParameters() {
         return Arrays.asList(new String[][]{
-                {"2°10,1\'", "21001", ""},
-                {"10\'1\'\'", "1001", ""},
-                {"2°1\'\'", "20001", ""},
-                {"1\'\'", "1", ""},
+                {"2°10,1\'", "2°10\'1\'\'", ""},
+                {"-2°10,1\'", "-2°10\'1\'\'", ""},
+                {"-2°0,1\'", "-2°0\'1\'\'", ""},
         });
     }
 
     @Test
     public void mainTest() throws Exception {
-        assertEquals(param2, new DegreeNumber(param1).getNumber());
+        assertEquals(param2, new DegreeNumber(param1).toString());
     }
 }

@@ -15,6 +15,43 @@ public class DegreeNumber {
      */
     private BigDecimal mNumber;
 
+    DegreeNumber() {
+        mNumber = new BigDecimal("0");
+
+        BigDecimal bigDecimal= new BigDecimal("212.3");
+        BigDecimal degree = bigDecimal.divideToIntegralValue(new BigDecimal("100"));
+        BigDecimal minutes = bigDecimal.remainder(new BigDecimal("100"));
+    }
+
+    DegreeNumber(String number) {
+        setNumber(number);
+    }
+
+    DegreeNumber(BigDecimal number) {
+        mNumber = number;
+    }
+
+    public DegreeNumber add(DegreeNumber addedNumber) {
+        DegreeNumber result = new DegreeNumber(this.getNumber().add(addedNumber.getNumber()));
+
+        if (result.getMinutes().compareTo(new BigDecimal("60")) != -1 &&
+                this.getNumber().signum() == 1 &&
+                addedNumber.getNumber().signum() == 1) {
+            /**
+             * Минуты больше 60
+             * Оба числа положительные
+             * ***
+             * Увеличить градусы на 1
+             * уменьшить минуты на 60
+             * */
+            BigDecimal temp = result.getNumber();
+            temp = temp.add(new BigDecimal("4000"));
+            result.setNumber(temp);
+        } 
+
+        return result;
+    }
+
     public BigDecimal getDegrees() {
         return mNumber.divideToIntegralValue(new BigDecimal("10000"));
     }
@@ -26,18 +63,6 @@ public class DegreeNumber {
 
     public BigDecimal getSeconds() {
         return mNumber.remainder(new BigDecimal("100")).abs();
-    }
-
-    DegreeNumber() {
-        mNumber = new BigDecimal("0");
-
-        BigDecimal bigDecimal= new BigDecimal("212.3");
-        BigDecimal degree = bigDecimal.divideToIntegralValue(new BigDecimal("100"));
-        BigDecimal minutes = bigDecimal.remainder(new BigDecimal("100"));
-    }
-
-    DegreeNumber(String number) {
-        setNumber(number);
     }
 
     public void setNumber(String number) {
@@ -94,7 +119,15 @@ public class DegreeNumber {
         }
     }
 
-    public String getNumber() {
+    public void setNumber(BigDecimal number) {
+        mNumber = number;
+    }
+
+    public BigDecimal getNumber() {
+        return mNumber;
+    }
+
+    public String getNumberAsText() {
         return mNumber.toString();
     }
 
