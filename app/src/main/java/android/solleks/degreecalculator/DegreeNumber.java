@@ -34,20 +34,101 @@ public class DegreeNumber {
     public DegreeNumber add(DegreeNumber addedNumber) {
         DegreeNumber result = new DegreeNumber(this.getNumber().add(addedNumber.getNumber()));
 
-        if (result.getMinutes().compareTo(new BigDecimal("60")) != -1 &&
-                this.getNumber().signum() == 1 &&
-                addedNumber.getNumber().signum() == 1) {
-            /**
-             * Минуты больше 60
-             * Оба числа положительные
-             * ***
-             * Увеличить градусы на 1
-             * уменьшить минуты на 60
-             * */
-            BigDecimal temp = result.getNumber();
-            temp = temp.add(new BigDecimal("4000"));
-            result.setNumber(temp);
-        } 
+
+        if (this.getNumber().signum() + addedNumber.getNumber().signum() == 0 &&
+                this.getDegrees().compareTo(new BigDecimal("0")) == 0 &&
+                addedNumber.getDegrees().compareTo(new BigDecimal("0")) == 0) {
+            // Тёрки вокруг нуля
+
+        } else {
+
+            if (this.getNumber().signum() == 1 &&
+                    addedNumber.getNumber().signum() == 1) {
+                // Оба числа положительные
+                if ((this.getSignedSeconds().add(addedNumber.getSignedSeconds())).compareTo(new BigDecimal("60")) != -1) {
+                    /**
+                     * Секунды больше или равны 60
+                     * Оба числа положительные
+                     * ***
+                     * Увеличить минуты на 1
+                     * уменьшить секунды на 60
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("40"));
+                    result.setNumber(temp);
+                }
+                if ((this.getSignedMinutes().add(addedNumber.getSignedMinutes())).compareTo(new BigDecimal("60")) != -1 ||
+                        result.getMinutes().compareTo(new BigDecimal("60")) != -1) {
+                    /**
+                     * Минуты больше или равны 60
+                     * Оба числа положительные
+                     * ***
+                     * Увеличить градусы на 1
+                     * уменьшить минуты на 60
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("4000"));
+                    result.setNumber(temp);
+                }
+
+            }
+            if (this.getNumber().signum() == -1 &&
+                    addedNumber.getNumber().signum() == -1) {
+                // Оба числа отрицательные
+                if ((this.getSeconds().add(addedNumber.getSeconds())).compareTo(new BigDecimal("60")) != -1) {
+                    /**
+                     * Секунды больше или равны 60
+                     * Оба числа отрицательные
+                     * ***
+                     * Уменьшить минуты на 1
+                     * Увеличить секунды на 60
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("-40"));
+                    result.setNumber(temp);
+                }
+                if ((this.getMinutes().add(addedNumber.getMinutes())).compareTo(new BigDecimal("60")) != -1 ||
+                        result.getMinutes().compareTo(new BigDecimal("60")) != -1) {
+                    /**
+                     * Минуты больше или равны 60
+                     * Оба числа отрицательные
+                     * ***
+                     * Уменьшить градусы на 1
+                     * Увеличить минуты на 60
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("-4000"));
+                    result.setNumber(temp);
+                }
+            }
+
+            if (this.getNumber().signum() + addedNumber.getNumber().signum() == 0) {
+                if ((this.getSignedSeconds().add(addedNumber.getSignedSeconds())).signum() == -1) {
+                    // TODO Подумать ещё раз
+                    /**
+                     * Секунды меньше 00
+                     * ***
+                     * уменьшить секунды на
+                     * уменьшить минуты на 40
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("-4040"));
+                    result.setNumber(temp);
+                }
+                if ((this.getSignedMinutes().add(addedNumber.getSignedMinutes())).signum() == -1) {
+                    // TODO Подумать ещё раз
+                    /**
+                     * Секунды меньше 00
+                     * ***
+                     * уменьшить секунды на
+                     * уменьшить минуты на 40
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("-4000"));
+                    result.setNumber(temp);
+                }
+            }
+        }
 
         return result;
     }
@@ -59,6 +140,15 @@ public class DegreeNumber {
     public BigDecimal getMinutes() {
         BigDecimal minutes = mNumber.divideToIntegralValue(new BigDecimal("100"));
         return minutes.remainder(new BigDecimal("100")).abs();
+    }
+
+    public BigDecimal getSignedSeconds() {
+        return mNumber.remainder(new BigDecimal("100"));
+    }
+
+    public BigDecimal getSignedMinutes() {
+        BigDecimal minutes = mNumber.divideToIntegralValue(new BigDecimal("100"));
+        return minutes.remainder(new BigDecimal("100"));
     }
 
     public BigDecimal getSeconds() {
@@ -133,7 +223,10 @@ public class DegreeNumber {
 
     @Override
     public String toString() {
-        return getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
+        if (mNumber.signum() == -1 && getDegrees().compareTo(new BigDecimal("0")) == 0)
+            return '-' + getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
+        else
+            return getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
     }
 }
 

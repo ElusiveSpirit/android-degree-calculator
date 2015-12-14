@@ -18,20 +18,21 @@ public class DegreeInitTest {
 
     private String param1;
     private String param2;
-    private String result;
 
-    public DegreeInitTest(String params1, String params2, String result) {
+    public DegreeInitTest(String params1, String params2) {
         this.param1 = params1;
         this.param2 = params2;
-        this.result = result;
     }
 
     @Parameters
     public static Collection getParameters() {
         return Arrays.asList(new String[][]{
-                {"2°10,1\'", "2°10\'1\'\'", ""},
-                {"-2°10,1\'", "-2°10\'1\'\'", ""},
-                {"-2°0,1\'", "-2°0\'1\'\'", ""},
+                {"-0°31,1'", "-0°31'1''"},
+                {"-0°31'1''", "-0°31'1''"},
+                {"-0°0,1'", "-0°0'1''"},
+                {"2°10,1\'", "2°10\'1\'\'"},
+                {"-2°10,1\'", "-2°10\'1\'\'"},
+                {"-2°0,1\'", "-2°0\'1\'\'"},
         });
     }
 
