@@ -17,10 +17,6 @@ public class DegreeNumber {
 
     DegreeNumber() {
         mNumber = new BigDecimal("0");
-
-        BigDecimal bigDecimal= new BigDecimal("212.3");
-        BigDecimal degree = bigDecimal.divideToIntegralValue(new BigDecimal("100"));
-        BigDecimal minutes = bigDecimal.remainder(new BigDecimal("100"));
     }
 
     DegreeNumber(String number) {
