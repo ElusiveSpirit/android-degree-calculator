@@ -31,15 +31,67 @@ public class DegreeNumber {
         DegreeNumber result = new DegreeNumber(this.getNumber().add(addedNumber.getNumber()));
 
 
-        if (this.getNumber().signum() + addedNumber.getNumber().signum() == 0 &&
+        if (result.getDegrees().compareTo(new BigDecimal("0")) == 0 ||
+                (this.getNumber().signum() + addedNumber.getNumber().signum() == 0 &&
                 this.getDegrees().compareTo(new BigDecimal("0")) == 0 &&
-                addedNumber.getDegrees().compareTo(new BigDecimal("0")) == 0) {
-            // Тёрки вокруг нуля
+                addedNumber.getDegrees().compareTo(new BigDecimal("0")) == 0)) {
+                // Тёрки вокруг нуля
+                if (result.getSignedSeconds().compareTo(new BigDecimal("60")) != -1) {
+                    /**
+                     * Секунды больше или равны 60
+                     * Оба числа положительные
+                     * ***
+                     * Увеличить минуты на 1
+                     * уменьшить секунды на 60
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("40"));
+                    result.setNumber(temp);
+                }
+                if (result.getSignedMinutes().compareTo(new BigDecimal("60")) != -1) {
+                    /**
+                     * Минуты больше или равны 60
+                     * Оба числа положительные
+                     * ***
+                     * Увеличить градусы на 1
+                     * уменьшить минуты на 60
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("4000"));
+                    result.setNumber(temp);
+                }
+
+                if (result.getNumber().signum() == -1 &&
+                        result.getSeconds().compareTo(new BigDecimal("60")) != -1 ) {
+                    /**
+                     * Секунды больше или равны 60
+                     * Оба числа отрицательные
+                     * ***
+                     * Уменьшить минуты на 1
+                     * Увеличить секунды на 60
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("-40"));
+                    result.setNumber(temp);
+                }
+                if (result.getNumber().signum() == -1 &&
+                        result.getMinutes().compareTo(new BigDecimal("60")) != -1) {
+                    /**
+                     * Минуты больше или равны 60
+                     * Оба числа отрицательные
+                     * ***
+                     * Уменьшить градусы на 1
+                     * Увеличить минуты на 60
+                     * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("-4000"));
+                    result.setNumber(temp);
+                }
 
         } else {
 
-            if (this.getNumber().signum() == 1 &&
-                    addedNumber.getNumber().signum() == 1) {
+            if ((this.getNumber().signum() == 1 &&
+                    addedNumber.getNumber().signum() == 1)) {
                 // Оба числа положительные
                 if ((this.getSignedSeconds().add(addedNumber.getSignedSeconds())).compareTo(new BigDecimal("60")) != -1) {
                     /**
@@ -215,6 +267,20 @@ public class DegreeNumber {
 
     public String getNumberAsText() {
         return mNumber.toString();
+    }
+
+    public String getRadians() {
+        BigDecimal resultD = getDegrees()
+                .multiply(new BigDecimal(String.valueOf(Math.PI)))
+                .divide(new BigDecimal("180"), 6, BigDecimal.ROUND_HALF_UP);
+        BigDecimal resultM = getSignedMinutes()
+                .multiply(new BigDecimal(String.valueOf(Math.PI)))
+                .divide(new BigDecimal("10800"), 6, BigDecimal.ROUND_HALF_UP);
+        BigDecimal resultS = getSignedSeconds()
+                .multiply(new BigDecimal(String.valueOf(Math.PI)))
+                .divide(new BigDecimal("648000"), 6, BigDecimal.ROUND_HALF_UP);
+        BigDecimal result = resultD.add(resultM).add(resultS);
+        return result.toString();
     }
 
     @Override

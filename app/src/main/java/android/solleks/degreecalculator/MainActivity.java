@@ -18,6 +18,7 @@ public class MainActivity extends Activity {
     public static final char DEGREE  = '°';
 
     private TextView mainText;
+    private TextView resultText;
 
     private ArrayList<DegreeNumber> mNumbersList;
     private StringBuilder currentNumber;
@@ -29,6 +30,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main_activity);
 
         mainText = (TextView) findViewById(R.id.textMain);
+        resultText = (TextView) findViewById(R.id.textResult);
 
         mNumbersList = new ArrayList<>();
         mNumbersList.add(new DegreeNumber());
@@ -54,11 +56,12 @@ public class MainActivity extends Activity {
             mResult = mNumbersList.get(0);
             for (int i = 1; i < mNumbersList.size(); i++)
                 mResult = mResult.add(mNumbersList.get(i));
-            ((TextView) findViewById(R.id.textResult)).setText(mResult.toString());
+            resultText.setText(mResult.toString());
         } else if (mNumbersList.size() == 1 &&
                 (currentNumber.charAt(lastIndex) == DEGREE ||
                  currentNumber.charAt(lastIndex) == '\'')) {
             mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
+            resultText.setText(mNumbersList.get(0).getRadians() + "рад");
         }
 
       /*  TextView textView = ((TextView) findViewById(R.id.textMain));
@@ -77,7 +80,7 @@ public class MainActivity extends Activity {
                 mNumbersList.add(new DegreeNumber());
                 currentNumber = new StringBuilder();
                 mainText.setText("");
-                ((TextView) findViewById(R.id.textResult)).setText("");
+                resultText.setText("");
               /*  if (currentNumber.length() > 0) {
                     currentNumber.deleteCharAt(currentNumber.length() - 1);
                     if (currentNumber.charAt(currentNumber.length() - 1) >= '0' &&
@@ -92,23 +95,30 @@ public class MainActivity extends Activity {
                 }
                 break;
             case R.id.button_minute :
-                if (currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
+                if (currentNumber.length() > 0 &&
+                        currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
                         currentNumber.charAt(currentNumber.length() - 1) != ',' &&
                         currentNumber.charAt(currentNumber.length() - 1) != '-' &&
-                        currentNumber.toString().split("\'").length - 1 < 3 &&
-                        currentNumber.length() > 0) {
+                        getNumberOfChars(currentNumber, '\'') < 3 &&
+                        !(contains(currentNumber, ',') && contains(currentNumber, '\''))) {
                     onClickNumber(view);
                 }
                 break;
             case R.id.button_second :
-                if (!contains(currentNumber, ',') &&
+                if (currentNumber.length() > 0 &&
+                        !contains(currentNumber, '\'') &&
+                        !contains(currentNumber, ',') &&
                         currentNumber.charAt(currentNumber.length() - 1) != '-' &&
-                        currentNumber.length() > 0) {
+                        currentNumber.charAt(currentNumber.length() - 1) != DEGREE) {
                     onClickNumber(view);
                 }
                 break;
             case R.id.button_equal:
-                currentNumber.append(getResources().getString(R.string.equal));
+                mNumbersList.clear();
+                mNumbersList.add(new DegreeNumber(resultText.getText().toString()));
+                currentNumber = new StringBuilder(resultText.getText());
+                mainText.setText(resultText.getText());
+                resultText.setText(mNumbersList.get(0).getRadians() + "рад");
                 break;
             case R.id.button_plus :
                 if (currentNumber.length() > 1 &&
@@ -121,9 +131,10 @@ public class MainActivity extends Activity {
                 }
                 break;
             case R.id.button_minus :
-                if (currentNumber.length() == 0)
+                if (currentNumber.length() == 0) {
                     currentNumber.append(getResources().getString(R.string.minus));
-                else if (currentNumber.length() > 1 &&
+                    mainText.append(getResources().getString(R.string.minus));
+                } else if (currentNumber.length() > 1 &&
                         (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
                         currentNumber.charAt(currentNumber.length() - 1) == '\'')){
                     mNumbersList.add(new DegreeNumber());
