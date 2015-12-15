@@ -162,7 +162,7 @@ public class DegreeNumber {
                      * уменьшить минуты на 40
                      * */
                     BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("-4040"));
+                    temp = temp.add(new BigDecimal("-40"));
                     result.setNumber(temp);
                 }
                 if ((this.getSignedMinutes().add(addedNumber.getSignedMinutes())).signum() == -1) {
@@ -173,6 +173,11 @@ public class DegreeNumber {
                      * уменьшить секунды на
                      * уменьшить минуты на 40
                      * */
+                    BigDecimal temp = result.getNumber();
+                    temp = temp.add(new BigDecimal("-4000"));
+                    result.setNumber(temp);
+                }
+                if (result.getSignedMinutes().compareTo(new BigDecimal("60")) != -1) {
                     BigDecimal temp = result.getNumber();
                     temp = temp.add(new BigDecimal("-4000"));
                     result.setNumber(temp);

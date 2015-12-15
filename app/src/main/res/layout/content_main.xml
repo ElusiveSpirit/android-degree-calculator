@@ -151,7 +151,8 @@
                 android:text="@string/clear"
                 android:onClick="onClick"
                 android:layout_weight="1"
-                android:textSize="@dimen/main_text_size" />
+                android:textSize="@dimen/main_text_size"
+                android:longClickable="false" />
             <Button
                 android:id="@+id/button_degree"
                 android:layout_width="match_parent"

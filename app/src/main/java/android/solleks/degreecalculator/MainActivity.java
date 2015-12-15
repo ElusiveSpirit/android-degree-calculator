@@ -39,6 +39,18 @@ public class MainActivity extends AppCompatActivity {
 
         mainText = (TextView) findViewById(R.id.textMain);
         resultText = (TextView) findViewById(R.id.textResult);
+        Button button_C = (Button) findViewById(R.id.button_clear);
+        button_C.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mNumbersList.clear();
+                mNumbersList.add(new DegreeNumber());
+                currentNumber = new StringBuilder();
+                mainText.setText("");
+                resultText.setText("");
+                return true;
+            }
+        });
 
         mNumbersList = new ArrayList<>();
         mNumbersList.add(new DegreeNumber());
@@ -113,17 +125,30 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_clear :
-                mNumbersList.clear();
-                mNumbersList.add(new DegreeNumber());
-                currentNumber = new StringBuilder();
-                mainText.setText("");
-                resultText.setText("");
-              /*  if (currentNumber.length() > 0) {
-                    currentNumber.deleteCharAt(currentNumber.length() - 1);
-                    if (currentNumber.charAt(currentNumber.length() - 1) >= '0' &&
-                            currentNumber.charAt(currentNumber.length() - 1) <= '9')
-                        onClickNumber(view);
-                }*/
+                String str = mainText.getText().toString();
+                if (str.length() > 0) {
+                    if (str.length() > 1)
+                        str = str.substring(0, str.length() - 1);
+                    else
+                        str = "";
+                    mNumbersList.clear();
+                    currentNumber = new StringBuilder();
+                    for (int i = 0; i < str.length(); i++) {
+                        if (str.charAt(i) == '+' ||
+                                str.charAt(i) == '-' && i != 0) {
+                            mNumbersList.add(new DegreeNumber(currentNumber.toString()));
+                            currentNumber.delete(0, currentNumber.length() - 1);
+
+                        }
+                        if (str.charAt(i) != '+')
+                            currentNumber.append(str.charAt(i));
+                    }
+
+                    mainText.setText(str);
+                    mNumbersList.add(new DegreeNumber(currentNumber.toString()));
+                    if (str.length() > 0) setResultText();
+                    else resultText.setText("");
+                }
                 break;
             case R.id.button_degree :
                 if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
