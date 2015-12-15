@@ -3,6 +3,5 @@
     <header android:fragment="android.solleks.degreecalculator.SettingsActivity$Prefs1Fragment"
         android:title="Настройки интерфейса"
         android:summary="Шаблон вывода, размер текста и др." >
-        <extra android:name="resource" android:value="settings" />
     </header>
 </preference-headers>

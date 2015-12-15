@@ -1,30 +1,19 @@
 package android.solleks.degreecalculator;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-
-import java.util.List;
 
 /**
  * Created by Константин on 15.12.2015.
  *
  */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return true;
-    }
-
-    @Override
-    public void onBuildHeaders(List<Header> target) {
-        loadHeadersFromResource(R.xml.settings_headers, target);
+        setContentView(R.layout.activity_settings);
     }
 
     public static class Prefs1Fragment extends PreferenceFragment {
@@ -32,11 +21,7 @@ public class SettingsActivity extends PreferenceActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            int res= getActivity().getResources()
-                    .getIdentifier(getArguments().getString("resource"),"xml",
-                            getActivity().getPackageName());
-
-            addPreferencesFromResource(res);
+            addPreferencesFromResource(R.xml.settings);
         }
 
 
