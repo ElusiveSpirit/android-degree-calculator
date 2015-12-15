@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="@string/template_key_string"
+        android:summary="@string/template_text"
+        android:title="@string/template"
+        android:entries="@array/templates"
+        android:entryValues="@array/templates"
+        android:defaultValue="0"
+        android:dialogTitle="Выберите шаблон"/>
+    <ListPreference
+        android:key="@string/text_size_key_string"
+        android:title="Размер шрифта"
+        android:summary="Установить новый размер шрифта"
+        android:entries="@array/text_size"
+        android:entryValues="@array/text_size"
+        android:defaultValue="0"
+        android:dialogTitle="Размер шрифта" />
+</PreferenceScreen>

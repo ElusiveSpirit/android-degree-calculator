@@ -8,6 +8,8 @@ import java.math.BigDecimal;
  */
 public class DegreeNumber {
 
+    private static int toStringTemplate = 0;
+
     /**
      * Первые два порядка - секунды
      * Вторые два порядка - минуты
@@ -285,10 +287,27 @@ public class DegreeNumber {
 
     @Override
     public String toString() {
-        if (mNumber.signum() == -1 && getDegrees().compareTo(new BigDecimal("0")) == 0)
-            return '-' + getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
-        else
-            return getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
+        if (toStringTemplate == 0) {
+            if (mNumber.signum() == -1 && getDegrees().compareTo(new BigDecimal("0")) == 0)
+                return '-' + getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
+            else
+                return getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
+        } else {
+            if (mNumber.signum() == -1 && getDegrees().compareTo(new BigDecimal("0")) == 0)
+                return '-' + getDegrees().toString() + '°' + getMinutes().toString() + ',' + getSeconds() + "\'";
+            else
+                return getDegrees().toString() + '°' + getMinutes().toString() + ',' + getSeconds() + "\'";
+        }
+    }
+
+
+    public static void setToStringTemplate(int toStringTemplate) {
+        if (toStringTemplate < 2)
+            DegreeNumber.toStringTemplate = toStringTemplate;
+    }
+
+    public static int getToStringTemplate() {
+        return toStringTemplate;
     }
 }
 

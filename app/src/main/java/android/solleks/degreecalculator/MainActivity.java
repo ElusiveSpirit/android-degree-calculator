@@ -1,7 +1,12 @@
 package android.solleks.degreecalculator;
 
-import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -12,7 +17,10 @@ import java.util.ArrayList;
  * Created by Константин on 13.12.2015.
  *
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
+
+    public static final String TEMPLATE_KEY = "android.solleks.degreecalculator.TEMPLATE_KEY";
+    public static final String TEXT_SIZE_KEY = "android.solleks.degreecalculator.TEXT_SIZE_KEY";
 
     private static final char[] DEGREE_CHARS_NOT_ALLOW = {'°', ',', '\''};
     public static final char DEGREE  = '°';
@@ -27,7 +35,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
+        setContentView(R.layout.content_main);
 
         mainText = (TextView) findViewById(R.id.textMain);
         resultText = (TextView) findViewById(R.id.textResult);
@@ -37,21 +45,58 @@ public class MainActivity extends Activity {
         currentNumber = new StringBuilder();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if(preferences.getString(TEMPLATE_KEY, "").equals(getResources().getStringArray(R.array.templates)[1])) {
+            DegreeNumber.setToStringTemplate(1);
+        } else {
+            DegreeNumber.setToStringTemplate(0);
+        }
+        if (!resultText.getText().equals("")) {
+            resultText.setText(mResult.toString());
+        }
+
+        String text_size = preferences.getString(TEXT_SIZE_KEY, getResources().getStringArray(R.array.text_size)[0]);
+        float size =  getResources().getDimension(R.dimen.text_main_size);
+        if (text_size.equals(getResources().getStringArray(R.array.text_size)[1])) {
+            size =  getResources().getDimension(R.dimen.text_middle_size);
+        } else if (text_size.equals(getResources().getStringArray(R.array.text_size)[2])) {
+            size =  getResources().getDimension(R.dimen.text_little_size);
+        }
+        mainText.setTextSize(size);
+        resultText.setTextSize(size);
+    }
+
     public void onClickNumber(View view) {
         Button button = (Button) view;
+        try {
+            // TODO Не давать вводить ставить знак минуты или секунды, если введено больше двух цифр
+            // TODO Не вводить цифру, если градусы уже введены и уже введено две цифры минуты или секунды
+            int a = Integer.parseInt(button.getText().toString());
+            //if (mNumbersList.size() > 2)
+        } catch (Exception e) {
+            // не цифра
+        }
         if (view.getId() != R.id.button_clear)
             currentNumber.append(button.getText());
         mainText.append(button.getText());
 
+        setResultText();
+    }
+
+    public void setResultText() {
         int lastIndex = currentNumber.length() - 1;
         int numberOfMinutes = getNumberOfChars(currentNumber, '\'');
 
         if (mNumbersList.size() > 1 &&
                 (currentNumber.charAt(lastIndex) == DEGREE ||
-                (currentNumber.charAt(lastIndex) == '\'' &&
-                    (numberOfMinutes == 1 ||
-                     numberOfMinutes == 3 ||
-                    (numberOfMinutes == 2 && currentNumber.charAt(lastIndex - 1) == '\''))))) {
+                        (currentNumber.charAt(lastIndex) == '\'' &&
+                                (numberOfMinutes == 1 ||
+                                        numberOfMinutes == 3 ||
+                                        (numberOfMinutes == 2 && currentNumber.charAt(lastIndex - 1) == '\''))))) {
             mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
             mResult = mNumbersList.get(0);
             for (int i = 1; i < mNumbersList.size(); i++)
@@ -59,18 +104,10 @@ public class MainActivity extends Activity {
             resultText.setText(mResult.toString());
         } else if (mNumbersList.size() == 1 &&
                 (currentNumber.charAt(lastIndex) == DEGREE ||
-                 currentNumber.charAt(lastIndex) == '\'')) {
+                        currentNumber.charAt(lastIndex) == '\'')) {
             mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
             resultText.setText(mNumbersList.get(0).getRadians() + "рад");
         }
-
-      /*  TextView textView = ((TextView) findViewById(R.id.textMain));
-        textView.setText(mNumbersList.get(0).toString());
-        for (int i = 1; i < mNumbersList.size(); i++) {
-            if (mNumbersList.get(i).getNumber().signum() == 1)
-                textView.append("+");
-            textView.append(mNumbersList.get(i).toString());
-        }*/
     }
 
     public void onClick(View view) {
@@ -145,6 +182,30 @@ public class MainActivity extends Activity {
                 break;
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     private boolean contains(StringBuilder string, char letter) {
         for (char ch : string.toString().toCharArray())

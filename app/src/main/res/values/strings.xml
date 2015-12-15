@@ -1,4 +1,6 @@
 <resources>
+    <string name="template_key_string">android.solleks.degreecalculator.TEMPLATE_KEY</string>
+    <string name="text_size_key_string">android.solleks.degreecalculator.TEXT_SIZE_KEY</string>
     <string name="app_name">DegreeCalculator</string>
     <string name="degree">°</string>
     <string name="minute">\'</string>
@@ -17,4 +19,7 @@
     <string name="clear">C</string>
     <string name="plus">+</string>
     <string name="minus">-</string>
+    <string name="settings">Настройки</string>
+    <string name="template_text">Шаблон для вывода ответа</string>
+    <string name="template">Шаблон</string>
 </resources>
