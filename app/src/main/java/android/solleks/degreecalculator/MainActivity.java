@@ -85,10 +85,19 @@ public class MainActivity extends AppCompatActivity {
     public void onClickNumber(View view) {
         Button button = (Button) view;
         try {
-            // TODO Не давать вводить ставить знак минуты или секунды, если введено больше двух цифр
-            // TODO Не вводить цифру, если градусы уже введены и уже введено две цифры минуты или секунды
             int a = Integer.parseInt(button.getText().toString());
-            //if (mNumbersList.size() > 2)
+            if  (currentNumber.length() > 3) {
+                if ((currentNumber.charAt(currentNumber.length() - 2) == '\'' &&
+                        currentNumber.charAt(currentNumber.length() - 1) == '\'')) return;
+
+                if  ((currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
+                     currentNumber.charAt(currentNumber.length() - 1) != '\'' &&
+                     currentNumber.charAt(currentNumber.length() - 1) != ',')
+                        &&
+                    (currentNumber.charAt(currentNumber.length() - 3) == DEGREE ||
+                     currentNumber.charAt(currentNumber.length() - 3) == '\'' ||
+                     currentNumber.charAt(currentNumber.length() - 3) == ',')) return;
+            }
         } catch (Exception e) {
             // не цифра
         }
@@ -103,12 +112,14 @@ public class MainActivity extends AppCompatActivity {
         int lastIndex = currentNumber.length() - 1;
         int numberOfMinutes = getNumberOfChars(currentNumber, '\'');
 
-        if (mNumbersList.size() > 1 &&
+        if  (mNumbersList.size() > 1 &&
                 (currentNumber.charAt(lastIndex) == DEGREE ||
                         (currentNumber.charAt(lastIndex) == '\'' &&
-                                (numberOfMinutes == 1 ||
-                                        numberOfMinutes == 3 ||
-                                        (numberOfMinutes == 2 && currentNumber.charAt(lastIndex - 1) == '\''))))) {
+                            (numberOfMinutes == 1 ||
+                             numberOfMinutes == 3 ||
+                                (numberOfMinutes == 2 &&
+                                 currentNumber.charAt(lastIndex - 1) == '\''))))
+            ) {
             mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
             mResult = mNumbersList.get(0);
             for (int i = 1; i < mNumbersList.size(); i++)
@@ -157,21 +168,32 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.button_minute :
-                if (currentNumber.length() > 0 &&
+                if  (
+                        currentNumber.length() > 0 &&
                         currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
                         currentNumber.charAt(currentNumber.length() - 1) != ',' &&
                         currentNumber.charAt(currentNumber.length() - 1) != '-' &&
                         getNumberOfChars(currentNumber, '\'') < 3 &&
-                        !(contains(currentNumber, ',') && contains(currentNumber, '\''))) {
+                        !(contains(currentNumber, ',') &&
+                        contains(currentNumber, '\''))
+                    ) {
+                    if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
+                        currentNumber.length() > (currentNumber.charAt(0) == '-'? 3 : 2))
+                        break;
                     onClickNumber(view);
                 }
                 break;
             case R.id.button_second :
-                if (currentNumber.length() > 0 &&
+                if  (
+                        currentNumber.length() > 0 &&
                         !contains(currentNumber, '\'') &&
                         !contains(currentNumber, ',') &&
                         currentNumber.charAt(currentNumber.length() - 1) != '-' &&
-                        currentNumber.charAt(currentNumber.length() - 1) != DEGREE) {
+                        currentNumber.charAt(currentNumber.length() - 1) != DEGREE
+                    ) {
+                    if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
+                            currentNumber.length() > (currentNumber.charAt(0) == '-'? 3 : 2))
+                        break;
                     onClickNumber(view);
                 }
                 break;
@@ -183,9 +205,11 @@ public class MainActivity extends AppCompatActivity {
                 resultText.setText(mNumbersList.get(0).getRadians() + "рад");
                 break;
             case R.id.button_plus :
-                if (currentNumber.length() > 1 &&
-                        (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
-                        currentNumber.charAt(currentNumber.length() - 1) == '\'')){
+                if  (
+                        currentNumber.length() > 1 &&
+                            (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
+                             currentNumber.charAt(currentNumber.length() - 1) == '\'')
+                    ) {
                     mNumbersList.add(new DegreeNumber());
                     currentNumber = new StringBuilder();
                     currentNumber.append(getResources().getString(R.string.plus));
@@ -196,9 +220,12 @@ public class MainActivity extends AppCompatActivity {
                 if (currentNumber.length() == 0) {
                     currentNumber.append(getResources().getString(R.string.minus));
                     mainText.append(getResources().getString(R.string.minus));
-                } else if (currentNumber.length() > 1 &&
-                        (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
-                        currentNumber.charAt(currentNumber.length() - 1) == '\'')){
+                } else if
+                        (
+                            currentNumber.length() > 1 &&
+                                (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
+                                currentNumber.charAt(currentNumber.length() - 1) == '\'')
+                        ) {
                     mNumbersList.add(new DegreeNumber());
                     currentNumber = new StringBuilder();
                     currentNumber.append(getResources().getString(R.string.minus));
