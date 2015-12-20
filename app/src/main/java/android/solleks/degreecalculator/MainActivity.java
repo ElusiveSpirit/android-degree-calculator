@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TEMPLATE_KEY = "android.solleks.degreecalculator.TEMPLATE_KEY";
     public static final String TEXT_SIZE_KEY = "android.solleks.degreecalculator.TEXT_SIZE_KEY";
+    public static final String DEGREE_NUMBER_KEY = "android.solleks.degreecalculator.DEGREE_NUMBER_KEY";
 
     private static final char[] DEGREE_CHARS_NOT_ALLOW = {'°', ',', '\''};
     public static final char DEGREE  = '°';
@@ -62,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+
+
         if(preferences.getString(TEMPLATE_KEY, "").equals(getResources().getStringArray(R.array.templates)[1])) {
             DegreeNumber.setToStringTemplate(1);
         } else {
@@ -80,6 +83,14 @@ public class MainActivity extends AppCompatActivity {
         }
         mainText.setTextSize(size);
         resultText.setTextSize(size);
+
+        if(preferences.getString(DEGREE_NUMBER_KEY, "").equals(getResources().getStringArray(R.array.degree_number)[1])) {
+            DegreeNumber.setToDegreeNumberTemplate(1);
+        } else {
+            DegreeNumber.setToDegreeNumberTemplate(0);
+        }
+        if (mNumbersList.size() > 1)
+            setResultText();
     }
 
     public void onClickNumber(View view) {

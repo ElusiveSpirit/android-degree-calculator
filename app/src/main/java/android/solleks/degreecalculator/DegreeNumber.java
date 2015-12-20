@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 public class DegreeNumber {
 
     private static int toStringTemplate = 0;
+    private static int toDegreeNumberTemplate = 0;
 
     /**
      * Первые два порядка - секунды
@@ -229,6 +230,9 @@ public class DegreeNumber {
                 case '\'':
                     if (isMinutesAdded || number.length() > i + 1 && number.charAt(i + 1) == '\'') {
                         // Добавляюся секунды
+                        if (toDegreeNumberTemplate == 1 && currentNumber.length() == 1) {
+                            currentNumber.append("0");
+                        }
                         if (isMinus)
                             mNumber = mNumber.subtract(new BigDecimal(currentNumber.toString()));
                         else
@@ -237,7 +241,11 @@ public class DegreeNumber {
                         i++;
                     } else {
                         // Добавляются минуты
-                        currentNumber.append("00");
+                        if (toDegreeNumberTemplate == 1 && currentNumber.length() == 1) {
+                            currentNumber.append("000");
+                        } else {
+                            currentNumber.append("00");
+                        }
                         if (isMinus)
                             mNumber = mNumber.subtract(new BigDecimal(currentNumber.toString()));
                         else
@@ -247,7 +255,11 @@ public class DegreeNumber {
                     break;
                 case ',':
                     isMinutesAdded = true;
-                    currentNumber.append("00");
+                    if (toDegreeNumberTemplate == 1 && currentNumber.length() == 1) {
+                        currentNumber.append("000");
+                    } else {
+                        currentNumber.append("00");
+                    }
                     if (isMinus)
                         mNumber = mNumber.subtract(new BigDecimal(currentNumber.toString()));
                     else
@@ -309,6 +321,11 @@ public class DegreeNumber {
     public static void setToStringTemplate(int toStringTemplate) {
         if (toStringTemplate < 2)
             DegreeNumber.toStringTemplate = toStringTemplate;
+    }
+
+    public static void setToDegreeNumberTemplate(int toDegreeNumberTemplate) {
+        if (toDegreeNumberTemplate < 2)
+            DegreeNumber.toDegreeNumberTemplate = toDegreeNumberTemplate;
     }
 
     public static int getToStringTemplate() {

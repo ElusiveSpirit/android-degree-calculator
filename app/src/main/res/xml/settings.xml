@@ -16,4 +16,12 @@
         android:entryValues="@array/text_size"
         android:defaultValue="0"
         android:dialogTitle="Размер шрифта" />
+    <ListPreference
+        android:key="@string/degree_number_key_string"
+        android:title="Формат"
+        android:summary="Установить формат ввода:"
+        android:entries="@array/degree_number"
+        android:entryValues="@array/degree_number"
+        android:defaultValue="0"
+        android:dialogTitle="Введённая вами строка 1,2' должна соотвествовать:" />
 </PreferenceScreen>

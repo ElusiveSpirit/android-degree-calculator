@@ -11,4 +11,9 @@
         <item>Мелкий</item>
     </string-array>
 
+    <string-array name="degree_number">
+        <item>01,02\'</item>
+        <item>10,20\'</item>
+    </string-array>
+
 </resources>

@@ -1,6 +1,7 @@
 <resources>
     <string name="template_key_string">android.solleks.degreecalculator.TEMPLATE_KEY</string>
     <string name="text_size_key_string">android.solleks.degreecalculator.TEXT_SIZE_KEY</string>
+    <string name="degree_number_key_string">android.solleks.degreecalculator.DEGREE_NUMBER_KEY</string>
     <string name="app_name">DegreeCalculator</string>
     <string name="degree">°</string>
     <string name="minute">\'</string>
