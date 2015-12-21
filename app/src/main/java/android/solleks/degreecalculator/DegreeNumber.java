@@ -17,255 +17,132 @@ public class DegreeNumber {
      * Остальные - градусы
      */
     private BigDecimal mNumber;
+    private BigDecimal mDegrees;
+    private BigDecimal mMinutes;
+    private BigDecimal mSeconds;
+
 
     DegreeNumber() {
-        mNumber = new BigDecimal("0");
+        mDegrees = new BigDecimal("0");
+        mMinutes = new BigDecimal("0");
+        mSeconds = new BigDecimal("0");
     }
 
     DegreeNumber(String number) {
         setNumber(number);
     }
 
-    DegreeNumber(BigDecimal number) {
-        mNumber = number;
+    DegreeNumber(BigDecimal degrees, BigDecimal minutes, BigDecimal seconds) {
+        mDegrees = degrees;
+        mMinutes = minutes;
+        mSeconds = seconds;
     }
 
     public DegreeNumber add(DegreeNumber addedNumber) {
-        DegreeNumber result = new DegreeNumber(this.getNumber().add(addedNumber.getNumber()));
+        DegreeNumber result;
+        if (mSeconds.compareTo(new BigDecimal("0")) != 0 || addedNumber.getSeconds().compareTo(new BigDecimal("0")) != 0) {
+            // Если секунды не равняются нулю, то приводим к ним
 
+            BigDecimal firstNumber = mDegrees
+                    .multiply(new BigDecimal("3600"))
+                    .add(mMinutes.multiply(new BigDecimal("60")))
+                    .add(mSeconds);
+            BigDecimal secondNumber = addedNumber.getDegrees()
+                    .multiply(new BigDecimal("3600"))
+                    .add(addedNumber.getSignedMinutes().multiply(new BigDecimal("60")))
+                    .add(addedNumber.getSignedSeconds());
 
-        if (result.getDegrees().compareTo(new BigDecimal("0")) == 0 ||
-                (this.getNumber().signum() + addedNumber.getNumber().signum() == 0 &&
-                this.getDegrees().compareTo(new BigDecimal("0")) == 0 &&
-                addedNumber.getDegrees().compareTo(new BigDecimal("0")) == 0)) {
-                // Тёрки вокруг нуля
-                if (result.getSignedSeconds().compareTo(new BigDecimal("60")) != -1) {
-                    /**
-                     * Секунды больше или равны 60
-                     * Оба числа положительные
-                     * ***
-                     * Увеличить минуты на 1
-                     * уменьшить секунды на 60
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("40"));
-                    result.setNumber(temp);
-                }
-                if (result.getSignedMinutes().compareTo(new BigDecimal("60")) != -1) {
-                    /**
-                     * Минуты больше или равны 60
-                     * Оба числа положительные
-                     * ***
-                     * Увеличить градусы на 1
-                     * уменьшить минуты на 60
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("4000"));
-                    result.setNumber(temp);
-                }
+            BigDecimal resultNumber = firstNumber.add(secondNumber);
 
-                if (result.getNumber().signum() == -1 &&
-                        result.getSeconds().compareTo(new BigDecimal("60")) != -1 ) {
-                    /**
-                     * Секунды больше или равны 60
-                     * Оба числа отрицательные
-                     * ***
-                     * Уменьшить минуты на 1
-                     * Увеличить секунды на 60
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("-40"));
-                    result.setNumber(temp);
-                }
-                if (result.getNumber().signum() == -1 &&
-                        result.getMinutes().compareTo(new BigDecimal("60")) != -1) {
-                    /**
-                     * Минуты больше или равны 60
-                     * Оба числа отрицательные
-                     * ***
-                     * Уменьшить градусы на 1
-                     * Увеличить минуты на 60
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("-4000"));
-                    result.setNumber(temp);
-                }
+            BigDecimal seconds = resultNumber.remainder(new BigDecimal("60"));
+            resultNumber = resultNumber.divide(new BigDecimal("60"), 0, BigDecimal.ROUND_DOWN);
+            BigDecimal minutes = resultNumber.remainder(new BigDecimal("60"));
+            BigDecimal degrees = resultNumber.divide(new BigDecimal("60"), 0, BigDecimal.ROUND_DOWN);
 
+            result = new DegreeNumber(degrees, minutes, seconds);
+        } else if (mMinutes.compareTo(new BigDecimal("0")) != 0 || addedNumber.getMinutes().compareTo(new BigDecimal("0")) != 0) {
+            // Если минуты не равняются нулю, то приводим к ним
+            BigDecimal firstNumber = mDegrees
+                    .multiply(new BigDecimal("60"))
+                    .add(mMinutes);
+            BigDecimal secondNumber = addedNumber.getDegrees()
+                    .multiply(new BigDecimal("60"))
+                    .add(addedNumber.getSignedMinutes());
+
+            BigDecimal resultNumber = firstNumber.add(secondNumber);
+
+            BigDecimal minutes = resultNumber.remainder(new BigDecimal("60"));
+            BigDecimal degrees = resultNumber.divide(new BigDecimal("60"), 0, BigDecimal.ROUND_DOWN);
+
+            result = new DegreeNumber(degrees, minutes, new BigDecimal("0"));
         } else {
-
-            if ((this.getNumber().signum() == 1 &&
-                    addedNumber.getNumber().signum() == 1)) {
-                // Оба числа положительные
-                if ((this.getSignedSeconds().add(addedNumber.getSignedSeconds())).compareTo(new BigDecimal("60")) != -1) {
-                    /**
-                     * Секунды больше или равны 60
-                     * Оба числа положительные
-                     * ***
-                     * Увеличить минуты на 1
-                     * уменьшить секунды на 60
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("40"));
-                    result.setNumber(temp);
-                }
-                if ((this.getSignedMinutes().add(addedNumber.getSignedMinutes())).compareTo(new BigDecimal("60")) != -1 ||
-                        result.getMinutes().compareTo(new BigDecimal("60")) != -1) {
-                    /**
-                     * Минуты больше или равны 60
-                     * Оба числа положительные
-                     * ***
-                     * Увеличить градусы на 1
-                     * уменьшить минуты на 60
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("4000"));
-                    result.setNumber(temp);
-                }
-
-            }
-            if (this.getNumber().signum() == -1 &&
-                    addedNumber.getNumber().signum() == -1) {
-                // Оба числа отрицательные
-                if ((this.getSeconds().add(addedNumber.getSeconds())).compareTo(new BigDecimal("60")) != -1) {
-                    /**
-                     * Секунды больше или равны 60
-                     * Оба числа отрицательные
-                     * ***
-                     * Уменьшить минуты на 1
-                     * Увеличить секунды на 60
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("-40"));
-                    result.setNumber(temp);
-                }
-                if ((this.getMinutes().add(addedNumber.getMinutes())).compareTo(new BigDecimal("60")) != -1 ||
-                        result.getMinutes().compareTo(new BigDecimal("60")) != -1) {
-                    /**
-                     * Минуты больше или равны 60
-                     * Оба числа отрицательные
-                     * ***
-                     * Уменьшить градусы на 1
-                     * Увеличить минуты на 60
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("-4000"));
-                    result.setNumber(temp);
-                }
-            }
-
-            if (this.getNumber().signum() + addedNumber.getNumber().signum() == 0) {
-                if ((this.getSignedSeconds().add(addedNumber.getSignedSeconds())).signum() == -1) {
-                    // TODO Подумать ещё раз
-                    /**
-                     * Секунды меньше 00
-                     * ***
-                     * уменьшить секунды на
-                     * уменьшить минуты на 40
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("-40"));
-                    result.setNumber(temp);
-                }
-                if ((this.getSignedMinutes().add(addedNumber.getSignedMinutes())).signum() == -1) {
-                    // TODO Подумать ещё раз
-                    /**
-                     * Секунды меньше 00
-                     * ***
-                     * уменьшить секунды на
-                     * уменьшить минуты на 40
-                     * */
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("-4000"));
-                    result.setNumber(temp);
-                }
-                if (result.getSignedMinutes().compareTo(new BigDecimal("60")) != -1) {
-                    BigDecimal temp = result.getNumber();
-                    temp = temp.add(new BigDecimal("-4000"));
-                    result.setNumber(temp);
-                }
-            }
+            // Оперируем только с градусами
+            result = new DegreeNumber(mDegrees.add(addedNumber.getDegrees()), new BigDecimal("0"), new BigDecimal("0"));
         }
+
 
         return result;
     }
 
     public BigDecimal getDegrees() {
-        return mNumber.divideToIntegralValue(new BigDecimal("10000"));
+        return mDegrees;
     }
 
     public BigDecimal getMinutes() {
-        BigDecimal minutes = mNumber.divideToIntegralValue(new BigDecimal("100"));
-        return minutes.remainder(new BigDecimal("100")).abs();
-    }
-
-    public BigDecimal getSignedSeconds() {
-        return mNumber.remainder(new BigDecimal("100"));
-    }
-
-    public BigDecimal getSignedMinutes() {
-        BigDecimal minutes = mNumber.divideToIntegralValue(new BigDecimal("100"));
-        return minutes.remainder(new BigDecimal("100"));
+        return mMinutes.abs();
     }
 
     public BigDecimal getSeconds() {
-        return mNumber.remainder(new BigDecimal("100")).abs();
+        return mSeconds.abs();
     }
 
+    public BigDecimal getSignedSeconds() {
+        return mSeconds;
+    }
+
+    public BigDecimal getSignedMinutes() {
+        return mMinutes;
+    }
+
+
     public void setNumber(String number) {
-        mNumber = new BigDecimal("0");
+        mDegrees = new BigDecimal("0");
+        mMinutes = new BigDecimal("0");
+        mSeconds = new BigDecimal("0");
+
         boolean isMinutesAdded = false;
         boolean isMinus = false;
         StringBuilder currentNumber = new StringBuilder();
         for (int i = 0; i < number.length(); i++) {
             switch (number.charAt(i)) {
                 case '°':
-                    currentNumber.append("0000");
                     if (isMinus)
-                        mNumber = mNumber.subtract(new BigDecimal(currentNumber.toString()));
+                        mDegrees = mDegrees.subtract(new BigDecimal(currentNumber.toString()));
                     else
-                        mNumber = mNumber.add(new BigDecimal(currentNumber.toString()));
+                        mDegrees = mDegrees.add(new BigDecimal(currentNumber.toString()));
                     currentNumber = new StringBuilder();
 
                     break;
                 case '\'':
-                    if (isMinutesAdded || number.length() > i + 1 && number.charAt(i + 1) == '\'') {
-                        // Добавляюся секунды
-                        if (toDegreeNumberTemplate == 1 && currentNumber.length() == 1) {
-                            currentNumber.append("0");
-                        }
-                        if (isMinus)
-                            mNumber = mNumber.subtract(new BigDecimal(currentNumber.toString()));
-                        else
-                            mNumber = mNumber.add(new BigDecimal(currentNumber.toString()));
-                        currentNumber = new StringBuilder();
-                        i++;
-                    } else {
+                    if (!isMinutesAdded && i != number.length() - 2 && number.charAt(i - 1) != '\'') {
                         // Добавляются минуты
-                        if (toDegreeNumberTemplate == 1 && currentNumber.length() == 1) {
-                            currentNumber.append("000");
-                        } else {
-                            currentNumber.append("00");
-                        }
+                        isMinutesAdded = true;
                         if (isMinus)
-                            mNumber = mNumber.subtract(new BigDecimal(currentNumber.toString()));
+                            mMinutes = mMinutes.subtract(new BigDecimal(currentNumber.toString()));
                         else
-                            mNumber = mNumber.add(new BigDecimal(currentNumber.toString()));
+                            mMinutes = mMinutes.add(new BigDecimal(currentNumber.toString()));
+                        currentNumber = new StringBuilder();
+                    } else if (number.charAt(i - 1) == '\'') {
+                        // Добавляются секунды
+                        if (isMinus)
+                            mSeconds = mSeconds.subtract(new BigDecimal(currentNumber.toString()));
+                        else
+                            mSeconds = mSeconds.add(new BigDecimal(currentNumber.toString()));
                         currentNumber = new StringBuilder();
                     }
                     break;
                 case ',':
-                    isMinutesAdded = true;
-                    if (toDegreeNumberTemplate == 1 && currentNumber.length() == 1) {
-                        currentNumber.append("000");
-                    } else {
-                        currentNumber.append("00");
-                    }
-                    if (isMinus)
-                        mNumber = mNumber.subtract(new BigDecimal(currentNumber.toString()));
-                    else
-                        mNumber = mNumber.add(new BigDecimal(currentNumber.toString()));
-                    currentNumber = new StringBuilder();
-
+                    currentNumber.append('.');
                     break;
                 case '-':
                     isMinus = true;
@@ -276,9 +153,6 @@ public class DegreeNumber {
         }
     }
 
-    public void setNumber(BigDecimal number) {
-        mNumber = number;
-    }
 
     public BigDecimal getNumber() {
         return mNumber;
@@ -304,17 +178,33 @@ public class DegreeNumber {
 
     @Override
     public String toString() {
-        if (toStringTemplate == 0) {
-            if (mNumber.signum() == -1 && getDegrees().compareTo(new BigDecimal("0")) == 0)
-                return '-' + getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
-            else
-                return getDegrees().toString() + '°' + getMinutes().toString() + '\'' + getSeconds() + "\'\'";
-        } else {
-            if (mNumber.signum() == -1 && getDegrees().compareTo(new BigDecimal("0")) == 0)
-                return '-' + getDegrees().toString() + '°' + getMinutes().toString() + ',' + getSeconds() + "\'";
-            else
-                return getDegrees().toString() + '°' + getMinutes().toString() + ',' + getSeconds() + "\'";
+        StringBuilder builder = new StringBuilder();
+        if (mDegrees.compareTo(new BigDecimal("0")) != 0) {
+            builder.append(getDegrees());
+            builder.append('°');
         }
+        if (mMinutes.compareTo(new BigDecimal("0")) != 0 ||
+                (mSeconds.compareTo(new BigDecimal("0")) != 0 && builder.length() > 0)) {
+            if (builder.length() > 0) {
+                builder.append(getMinutes());
+            } else {
+                builder.append(getSignedMinutes());
+            }
+            builder.append('\'');
+        }
+        if (mSeconds.compareTo(new BigDecimal("0")) != 0) {
+            if (builder.length() > 0) {
+                builder.append(getSeconds());
+            } else {
+                builder.append(getSignedSeconds());
+            }
+            builder.append("''");
+        }
+        for (int i = 0; i < builder.length(); i++)
+            if (builder.charAt(i) == '.'){
+                builder.setCharAt(i, ',');
+            }
+        return builder.toString();
     }
 
 

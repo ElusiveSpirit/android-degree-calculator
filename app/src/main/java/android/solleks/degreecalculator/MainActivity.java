@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String TEXT_SIZE_KEY = "android.solleks.degreecalculator.TEXT_SIZE_KEY";
     public static final String DEGREE_NUMBER_KEY = "android.solleks.degreecalculator.DEGREE_NUMBER_KEY";
 
-    private static final char[] DEGREE_CHARS_NOT_ALLOW = {'°', ',', '\''};
+    private static final char[] DEGREE_CHARS_NOT_ALLOW = {'°','\''};
     public static final char DEGREE  = '°';
 
     private TextView mainText;
@@ -32,6 +32,17 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<DegreeNumber> mNumbersList;
     private StringBuilder currentNumber;
     private DegreeNumber mResult;
+
+    /**
+     * 0 в градусах
+     * 1 в минутах
+     * 2 в секундах
+     * 3 не установлено
+     *
+     * Не даёт вводить значения в больший индекс
+     */
+    private int fractionInSum;
+    private boolean shouldEnterNumbers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
                 currentNumber = new StringBuilder();
                 mainText.setText("");
                 resultText.setText("");
+                fractionInSum = 4;
+                shouldEnterNumbers = true;
                 return true;
             }
         });
@@ -56,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
         mNumbersList = new ArrayList<>();
         mNumbersList.add(new DegreeNumber());
         currentNumber = new StringBuilder();
+        fractionInSum = 4;
+        shouldEnterNumbers = true;
+
     }
 
     @Override
@@ -94,20 +110,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickNumber(View view) {
+        if (!shouldEnterNumbers) return;
         Button button = (Button) view;
         try {
             int a = Integer.parseInt(button.getText().toString());
             if  (currentNumber.length() > 3) {
+                // Если последние два символа составляют секунды
                 if ((currentNumber.charAt(currentNumber.length() - 2) == '\'' &&
                         currentNumber.charAt(currentNumber.length() - 1) == '\'')) return;
 
-                if  ((currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
+                // Не вводить больше двух чифр в минуты и секунды
+               /* if  ((currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
                      currentNumber.charAt(currentNumber.length() - 1) != '\'' &&
                      currentNumber.charAt(currentNumber.length() - 1) != ',')
                         &&
                     (currentNumber.charAt(currentNumber.length() - 3) == DEGREE ||
-                     currentNumber.charAt(currentNumber.length() - 3) == '\'' ||
-                     currentNumber.charAt(currentNumber.length() - 3) == ',')) return;
+                     currentNumber.charAt(currentNumber.length() - 3) == '\'')) return;*/
             }
         } catch (Exception e) {
             // не цифра
@@ -124,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
         int numberOfMinutes = getNumberOfChars(currentNumber, '\'');
 
         if  (mNumbersList.size() > 1 &&
+                currentNumber.length() > 0 &&
                 (currentNumber.charAt(lastIndex) == DEGREE ||
                         (currentNumber.charAt(lastIndex) == '\'' &&
                             (numberOfMinutes == 1 ||
@@ -149,17 +168,26 @@ public class MainActivity extends AppCompatActivity {
             case R.id.button_clear :
                 String str = mainText.getText().toString();
                 if (str.length() > 0) {
-                    if (str.length() > 1)
+                    if (str.length() > 1) {
+                        if (str.charAt(str.length() - 1) == ',' ||
+                                str.charAt(str.length() - 1) == '\'' ||
+                                str.charAt(str.length() - 1) == DEGREE) {
+                            shouldEnterNumbers = true;
+                            fractionInSum = 4;
+                        }
                         str = str.substring(0, str.length() - 1);
-                    else
+                    } else {
                         str = "";
+                        shouldEnterNumbers = true;
+                        fractionInSum = 4;
+                    }
                     mNumbersList.clear();
                     currentNumber = new StringBuilder();
                     for (int i = 0; i < str.length(); i++) {
                         if (str.charAt(i) == '+' ||
                                 str.charAt(i) == '-' && i != 0) {
                             mNumbersList.add(new DegreeNumber(currentNumber.toString()));
-                            currentNumber.delete(0, currentNumber.length() - 1);
+                            currentNumber = new StringBuilder();
 
                         }
                         if (str.charAt(i) != '+')
@@ -174,8 +202,14 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.button_degree :
                 if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
-                        currentNumber.length() > 0) {
+                        currentNumber.length() > 0 &&
+                        fractionInSum >= 0) {
                     onClickNumber(view);
+                    if (contains(currentNumber, ',') && fractionInSum == 4) {
+                        fractionInSum = 0;
+                        shouldEnterNumbers = false;
+                    } else if (fractionInSum == 0)
+                        shouldEnterNumbers = false;
                 }
                 break;
             case R.id.button_minute :
@@ -185,30 +219,39 @@ public class MainActivity extends AppCompatActivity {
                         currentNumber.charAt(currentNumber.length() - 1) != ',' &&
                         currentNumber.charAt(currentNumber.length() - 1) != '-' &&
                         getNumberOfChars(currentNumber, '\'') < 3 &&
-                        !(contains(currentNumber, ',') &&
-                        contains(currentNumber, '\''))
+                        !(currentNumber.charAt(currentNumber.length() - 1) == '\'' &&
+                          currentNumber.charAt(currentNumber.length() - 2) == '\'') &&
+                        fractionInSum >= 1
                     ) {
-                    if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
+                /*    if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
                         currentNumber.length() > (currentNumber.charAt(0) == '-'? 3 : 2))
-                        break;
+                        break;*/
                     onClickNumber(view);
+                    if (contains(currentNumber, ',') && fractionInSum == 4) {
+                        if (currentNumber.charAt(currentNumber.length() - 2) == '\'')
+                            fractionInSum = 3;
+                        else
+                            fractionInSum = 2;
+                        shouldEnterNumbers = false;
+                    } else if (fractionInSum == 2)
+                        shouldEnterNumbers = false;
+                    else if (fractionInSum == 3 && currentNumber.charAt(currentNumber.length() - 2) == '\'')
+                        shouldEnterNumbers = false;
                 }
                 break;
-            case R.id.button_second :
+            case R.id.button_frac :
                 if  (
                         currentNumber.length() > 0 &&
-                        !contains(currentNumber, '\'') &&
                         !contains(currentNumber, ',') &&
                         currentNumber.charAt(currentNumber.length() - 1) != '-' &&
-                        currentNumber.charAt(currentNumber.length() - 1) != DEGREE
+                        currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
+                        currentNumber.charAt(currentNumber.length() - 1) != '\''
                     ) {
-                    if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
-                            currentNumber.length() > (currentNumber.charAt(0) == '-'? 3 : 2))
-                        break;
                     onClickNumber(view);
                 }
                 break;
             case R.id.button_equal:
+                if (mNumbersList.size() < 2) break;
                 mNumbersList.clear();
                 mNumbersList.add(new DegreeNumber(resultText.getText().toString()));
                 currentNumber = new StringBuilder(resultText.getText());
@@ -225,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
                     currentNumber = new StringBuilder();
                     currentNumber.append(getResources().getString(R.string.plus));
                     mainText.append(getResources().getString(R.string.plus));
+                    shouldEnterNumbers = true;
                 }
                 break;
             case R.id.button_minus :
@@ -241,6 +285,7 @@ public class MainActivity extends AppCompatActivity {
                     currentNumber = new StringBuilder();
                     currentNumber.append(getResources().getString(R.string.minus));
                     mainText.append(getResources().getString(R.string.minus));
+                    shouldEnterNumbers = true;
                 }
                 break;
         }
