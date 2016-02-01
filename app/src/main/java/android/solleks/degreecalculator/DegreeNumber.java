@@ -8,8 +8,7 @@ import java.math.BigDecimal;
  */
 public class DegreeNumber {
 
-    private static int toStringTemplate = 0;
-    private static int toDegreeNumberTemplate = 0;
+    private static boolean toStringTemplate = true;
 
     /**
      * Первые два порядка - секунды
@@ -179,12 +178,13 @@ public class DegreeNumber {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        if (mDegrees.compareTo(new BigDecimal("0")) != 0) {
+        if (mDegrees.compareTo(new BigDecimal("0")) != 0 || toStringTemplate) {
             builder.append(getDegrees());
             builder.append('°');
         }
         if (mMinutes.compareTo(new BigDecimal("0")) != 0 ||
-                (mSeconds.compareTo(new BigDecimal("0")) != 0 && builder.length() > 0)) {
+                (mSeconds.compareTo(new BigDecimal("0")) != 0 && builder.length() > 0) ||
+                toStringTemplate) {
             if (builder.length() > 0) {
                 builder.append(getMinutes());
             } else {
@@ -192,7 +192,8 @@ public class DegreeNumber {
             }
             builder.append('\'');
         }
-        if (mSeconds.compareTo(new BigDecimal("0")) != 0) {
+        if (mSeconds.compareTo(new BigDecimal("0")) != 0 ||
+                toStringTemplate) {
             if (builder.length() > 0) {
                 builder.append(getSeconds());
             } else {
@@ -208,17 +209,11 @@ public class DegreeNumber {
     }
 
 
-    public static void setToStringTemplate(int toStringTemplate) {
-        if (toStringTemplate < 2)
-            DegreeNumber.toStringTemplate = toStringTemplate;
+    public static void setToStringTemplate(boolean toStringTemplate) {
+        DegreeNumber.toStringTemplate = toStringTemplate;
     }
 
-    public static void setToDegreeNumberTemplate(int toDegreeNumberTemplate) {
-        if (toDegreeNumberTemplate < 2)
-            DegreeNumber.toDegreeNumberTemplate = toDegreeNumberTemplate;
-    }
-
-    public static int getToStringTemplate() {
+    public static boolean getToStringTemplate() {
         return toStringTemplate;
     }
 }

@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * Created by Константин on 13.12.2015.
@@ -19,318 +20,383 @@ import java.util.ArrayList;
  */
 public class MainActivity extends AppCompatActivity {
 
-    public static final String TEMPLATE_KEY = "android.solleks.degreecalculator.TEMPLATE_KEY";
-    public static final String TEXT_SIZE_KEY = "android.solleks.degreecalculator.TEXT_SIZE_KEY";
-    public static final String DEGREE_NUMBER_KEY = "android.solleks.degreecalculator.DEGREE_NUMBER_KEY";
+	public static final String TEMPLATE_KEY = "android.solleks.degreecalculator.TEMPLATE_KEY";
+	public static final String TEXT_SIZE_KEY = "android.solleks.degreecalculator.TEXT_SIZE_KEY";
+	public static final String DEGREE_NUMBER_KEY = "android.solleks.degreecalculator.DEGREE_NUMBER_KEY";
 
-    private static final char[] DEGREE_CHARS_NOT_ALLOW = {'°','\''};
-    public static final char DEGREE  = '°';
+	public static final char DEGREE	= '°';
 
-    private TextView mainText;
-    private TextView resultText;
+	private TextView mainText;
+	private TextView resultText;
 
-    private ArrayList<DegreeNumber> mNumbersList;
-    private StringBuilder currentNumber;
-    private DegreeNumber mResult;
+	private ArrayList<DegreeNumber> mNumbersList;
+	private StringBuilder currentNumber;
+	private DegreeNumber mResult;
 
-    /**
-     * 0 в градусах
-     * 1 в минутах
-     * 2 в секундах
-     * 3 не установлено
-     *
-     * Не даёт вводить значения в больший индекс
-     */
-    private int fractionInSum;
-    private boolean shouldEnterNumbers;
+	/**
+	 * 0 в градусах
+	 * 1 в минутах
+	 * 2 в секундах
+	 * 3 не установлено
+	 *
+	 * Не даёт вводить значения в больший индекс
+	 */
+	private int fractionInSum;
+	private boolean fractionTyped;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_main);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.content_main);
 
-        mainText = (TextView) findViewById(R.id.textMain);
-        resultText = (TextView) findViewById(R.id.textResult);
-        Button button_C = (Button) findViewById(R.id.button_clear);
-        button_C.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                mNumbersList.clear();
-                mNumbersList.add(new DegreeNumber());
-                currentNumber = new StringBuilder();
-                mainText.setText("");
-                resultText.setText("");
-                fractionInSum = 4;
-                shouldEnterNumbers = true;
-                return true;
-            }
-        });
+		mainText = (TextView) findViewById(R.id.textMain);
+		resultText = (TextView) findViewById(R.id.textResult);
+		Button button_C = (Button) findViewById(R.id.button_clear);
+		button_C.setOnLongClickListener(new View.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				mNumbersList.clear();
+				mNumbersList.add(new DegreeNumber());
+				currentNumber = new StringBuilder();
+				mainText.setText("");
+				resultText.setText("");
+				fractionInSum = 3;
+				return true;
+			}
+		});
 
-        mNumbersList = new ArrayList<>();
-        mNumbersList.add(new DegreeNumber());
-        currentNumber = new StringBuilder();
-        fractionInSum = 4;
-        shouldEnterNumbers = true;
+		mNumbersList = new ArrayList<>();
+		mNumbersList.add(new DegreeNumber());
+		currentNumber = new StringBuilder();
+		fractionInSum = 3;
+		fractionTyped = false;
+	}
 
-    }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		DegreeNumber.setToStringTemplate(preferences.getBoolean(TEMPLATE_KEY, true));
 
+		String text_size = preferences.getString(TEXT_SIZE_KEY, getResources().getStringArray(R.array.text_size)[0]);
+		float size =	getResources().getDimension(R.dimen.text_main_size);
+		if (text_size.equals(getResources().getStringArray(R.array.text_size)[1])) {
+			size =	getResources().getDimension(R.dimen.text_middle_size);
+		} else if (text_size.equals(getResources().getStringArray(R.array.text_size)[2])) {
+			size =	getResources().getDimension(R.dimen.text_little_size);
+		}
+		mainText.setTextSize(size);
+		resultText.setTextSize(size);
 
+		/*if(preferences.getString(DEGREE_NUMBER_KEY, "").equals(getResources().getStringArray(R.array.degree_number)[1])) {
+			DegreeNumber.setToDegreeNumberTemplate(1);
+		} else {
+			DegreeNumber.setToDegreeNumberTemplate(0);
+		}*/
+		if (mNumbersList.size() > 0)
+			setResultText();
+	}
 
-        if(preferences.getString(TEMPLATE_KEY, "").equals(getResources().getStringArray(R.array.templates)[1])) {
-            DegreeNumber.setToStringTemplate(1);
-        } else {
-            DegreeNumber.setToStringTemplate(0);
-        }
-        if (!resultText.getText().equals("")) {
-            resultText.setText(mResult.toString());
-        }
+	public void onClickNumber(View view) {
+		Button button = (Button) view;
 
-        String text_size = preferences.getString(TEXT_SIZE_KEY, getResources().getStringArray(R.array.text_size)[0]);
-        float size =  getResources().getDimension(R.dimen.text_main_size);
-        if (text_size.equals(getResources().getStringArray(R.array.text_size)[1])) {
-            size =  getResources().getDimension(R.dimen.text_middle_size);
-        } else if (text_size.equals(getResources().getStringArray(R.array.text_size)[2])) {
-            size =  getResources().getDimension(R.dimen.text_little_size);
-        }
-        mainText.setTextSize(size);
-        resultText.setTextSize(size);
+		// Проверка нажатой клавиши
+		String buttonChar = button.getText().toString();
+		if (buttonChar.matches("\\d")) {
+			if	(canNumberTyped(currentNumber.toString() + buttonChar, fractionInSum)) {
+				// Добавление цифры к числу и вывод на экран
+				currentNumber.append(buttonChar);
+				mainText.append(buttonChar);
+			} else
+				return;
+		} else {
+			// не цифра
+			if (view.getId() != R.id.button_clear) {
+				currentNumber.append(button.getText());
+				mainText.append(button.getText());
+			} else
+				return;
+		}
 
-        if(preferences.getString(DEGREE_NUMBER_KEY, "").equals(getResources().getStringArray(R.array.degree_number)[1])) {
-            DegreeNumber.setToDegreeNumberTemplate(1);
-        } else {
-            DegreeNumber.setToDegreeNumberTemplate(0);
-        }
-        if (mNumbersList.size() > 1)
-            setResultText();
-    }
+		setResultText();
+	}
 
-    public void onClickNumber(View view) {
-        if (!shouldEnterNumbers) return;
-        Button button = (Button) view;
-        try {
-            int a = Integer.parseInt(button.getText().toString());
-            if  (currentNumber.length() > 3) {
-                // Если последние два символа составляют секунды
-                if ((currentNumber.charAt(currentNumber.length() - 2) == '\'' &&
-                        currentNumber.charAt(currentNumber.length() - 1) == '\'')) return;
+	public void setResultText() {
+		int lastIndex = currentNumber.length() - 1;
+		int numberOfMinutes = getNumberOfChars(currentNumber, '\'');
 
-                // Не вводить больше двух чифр в минуты и секунды
-               /* if  ((currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
-                     currentNumber.charAt(currentNumber.length() - 1) != '\'' &&
-                     currentNumber.charAt(currentNumber.length() - 1) != ',')
-                        &&
-                    (currentNumber.charAt(currentNumber.length() - 3) == DEGREE ||
-                     currentNumber.charAt(currentNumber.length() - 3) == '\'')) return;*/
-            }
-        } catch (Exception e) {
-            // не цифра
-        }
-        if (view.getId() != R.id.button_clear)
-            currentNumber.append(button.getText());
-        mainText.append(button.getText());
+		// TODO Перенести эту дикость на регулярные выражения
+		if	(mNumbersList.size() > 1 &&
+				currentNumber.length() > 0 &&
+				(currentNumber.charAt(lastIndex) == DEGREE ||
+						(currentNumber.charAt(lastIndex) == '\'' &&
+								(numberOfMinutes == 1 ||
+										numberOfMinutes == 3 ||
+										(numberOfMinutes == 2 &&
+												currentNumber.charAt(lastIndex - 1) == '\''))))
+				) {
+			mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
+			mResult = mNumbersList.get(0);
+			// Суммирование чисел
+			for (int i = 1; i < mNumbersList.size(); i++)
+				mResult = mResult.add(mNumbersList.get(i));
+			// Вывод результата
+			resultText.setText(mResult.toString());
+		} else if (mNumbersList.size() == 1 &&
+					currentNumber.length() > 0 &&
+					(currentNumber.charAt(lastIndex) == DEGREE ||
+							currentNumber.charAt(lastIndex) == '\'')) {
+			// Если введено лишь одно число, то происходит вывод радиального значения
+			mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
+			resultText.setText(String.format("%sрад", mNumbersList.get(0).getRadians()));
+		} else {
+			resultText.setText("");
+		}
+	}
 
-        setResultText();
-    }
+	public void onClick(View view) {
+		switch (view.getId()) {
+			case R.id.button_clear :
+				String str = mainText.getText().toString();
+				if (str.length() > 0) {
+					// Стирание последнего символа
+					str = str.substring(0, str.length() - 1);
+					// Также стирается ещё один символ апострофа, если это были секунды
+					if (getNumberOfChars(new StringBuilder(str), '\'') == 2)
+						str = str.substring(0, str.length() - 1);
+					// Происходит затирание и перезапись чисел
+					mNumbersList.clear();
+					currentNumber = new StringBuilder();
+					fractionInSum = 3;
+					char ch;
+					for (int i = 0; i < str.length(); i++) {
+						ch = str.charAt(i);
+						if (ch == '+' || ch == '-' && i != 0) {
+							mNumbersList.add(new DegreeNumber(currentNumber.toString()));
 
-    public void setResultText() {
-        int lastIndex = currentNumber.length() - 1;
-        int numberOfMinutes = getNumberOfChars(currentNumber, '\'');
+							// При нахождении запятой изменяется
+							// значение fractionInSum на соотвествующее
+							if (fractionInSum == 3 && contains(currentNumber, ',')) {
+								ch = currentNumber.charAt(currentNumber.length() - 1);
+								if (ch == DEGREE)
+									fractionInSum = 0;
+								else if (ch == '\'') {
+									if (currentNumber.charAt(currentNumber.length() - 2) == '\'')
+										fractionInSum = 2;
+									else
+										fractionInSum = 1;
+								}
+							}
 
-        if  (mNumbersList.size() > 1 &&
-                currentNumber.length() > 0 &&
-                (currentNumber.charAt(lastIndex) == DEGREE ||
-                        (currentNumber.charAt(lastIndex) == '\'' &&
-                            (numberOfMinutes == 1 ||
-                             numberOfMinutes == 3 ||
-                                (numberOfMinutes == 2 &&
-                                 currentNumber.charAt(lastIndex - 1) == '\''))))
-            ) {
-            mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
-            mResult = mNumbersList.get(0);
-            for (int i = 1; i < mNumbersList.size(); i++)
-                mResult = mResult.add(mNumbersList.get(i));
-            resultText.setText(mResult.toString());
-        } else if (mNumbersList.size() == 1 &&
-                (currentNumber.charAt(lastIndex) == DEGREE ||
-                        currentNumber.charAt(lastIndex) == '\'')) {
-            mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
-            resultText.setText(mNumbersList.get(0).getRadians() + "рад");
-        }
-    }
+							currentNumber = new StringBuilder();
+						}
+						if (ch != '+')
+							currentNumber.append(str.charAt(i));
+					}
 
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.button_clear :
-                String str = mainText.getText().toString();
-                if (str.length() > 0) {
-                    if (str.length() > 1) {
-                        if (str.charAt(str.length() - 1) == ',' ||
-                                str.charAt(str.length() - 1) == '\'' ||
-                                str.charAt(str.length() - 1) == DEGREE) {
-                            shouldEnterNumbers = true;
-                            fractionInSum = 4;
-                        }
-                        str = str.substring(0, str.length() - 1);
-                    } else {
-                        str = "";
-                        shouldEnterNumbers = true;
-                        fractionInSum = 4;
-                    }
-                    mNumbersList.clear();
-                    currentNumber = new StringBuilder();
-                    for (int i = 0; i < str.length(); i++) {
-                        if (str.charAt(i) == '+' ||
-                                str.charAt(i) == '-' && i != 0) {
-                            mNumbersList.add(new DegreeNumber(currentNumber.toString()));
-                            currentNumber = new StringBuilder();
+					mainText.setText(str);
+					mNumbersList.add(new DegreeNumber(currentNumber.toString()));
+					if (str.length() > 0)
+						setResultText();
+					else
+						resultText.setText("");
+				}
+				break;
+			case R.id.button_degree :
+				if (canDegreeTyped(currentNumber.toString(), fractionInSum)) {
+					onClickNumber(view);
+				}
+				break;
+			case R.id.button_minute :
+				if (canMinuteTyped(currentNumber.toString(), fractionInSum)){
+					onClickNumber(view);
+					// Если удовлетворяет описанным ниже случаям, то добавить ещё один апостроф
+					if (addMinuteIfNeeded())
+						onClickNumber(view);
+				}
+				break;
+			case R.id.button_frac :
+				if (canFractionTyped(currentNumber.toString(), fractionInSum)) {
+					onClickNumber(view);
+					if (fractionInSum == 3)
+						fractionTyped = true;
+				}
+				break;
+			case R.id.button_equal:
+				if (mNumbersList.size() < 2) break;
+				mNumbersList.clear();
+				mNumbersList.add(new DegreeNumber(resultText.getText().toString()));
+				currentNumber = new StringBuilder(resultText.getText());
+				mainText.setText(resultText.getText());
+				resultText.setText(String.format("%sрад", mNumbersList.get(0).getRadians()));
+				break;
+			case R.id.button_plus :
+				if	(currentNumber.length() > 1) {
+					if (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
+							currentNumber.charAt(currentNumber.length() - 1) == '\'') {
 
-                        }
-                        if (str.charAt(i) != '+')
-                            currentNumber.append(str.charAt(i));
-                    }
+						if (fractionTyped) {
+							fractionTyped = false;
+							if (getNumberOfChars(currentNumber, '\'') > 1){
+								fractionInSum = 2;
+							} else if (getNumberOfChars(currentNumber, '\'') == 1) {
+								fractionInSum = 1;
+							} else {
+								fractionInSum = 0;
+							}
+						}
+						mNumbersList.add(new DegreeNumber());
+						currentNumber = new StringBuilder();
+						currentNumber.append(getResources().getString(R.string.plus));
+						mainText.append(getResources().getString(R.string.plus));
+					}
 
-                    mainText.setText(str);
-                    mNumbersList.add(new DegreeNumber(currentNumber.toString()));
-                    if (str.length() > 0) setResultText();
-                    else resultText.setText("");
-                }
-                break;
-            case R.id.button_degree :
-                if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
-                        currentNumber.length() > 0 &&
-                        fractionInSum >= 0) {
-                    onClickNumber(view);
-                    if (contains(currentNumber, ',') && fractionInSum == 4) {
-                        fractionInSum = 0;
-                        shouldEnterNumbers = false;
-                    } else if (fractionInSum == 0)
-                        shouldEnterNumbers = false;
-                }
-                break;
-            case R.id.button_minute :
-                if  (
-                        currentNumber.length() > 0 &&
-                        currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
-                        currentNumber.charAt(currentNumber.length() - 1) != ',' &&
-                        currentNumber.charAt(currentNumber.length() - 1) != '-' &&
-                        getNumberOfChars(currentNumber, '\'') < 3 &&
-                        !(currentNumber.charAt(currentNumber.length() - 1) == '\'' &&
-                          currentNumber.charAt(currentNumber.length() - 2) == '\'') &&
-                        fractionInSum >= 1
-                    ) {
-                /*    if (!contains(currentNumber, DEGREE_CHARS_NOT_ALLOW) &&
-                        currentNumber.length() > (currentNumber.charAt(0) == '-'? 3 : 2))
-                        break;*/
-                    onClickNumber(view);
-                    if (contains(currentNumber, ',') && fractionInSum == 4) {
-                        if (currentNumber.charAt(currentNumber.length() - 2) == '\'')
-                            fractionInSum = 3;
-                        else
-                            fractionInSum = 2;
-                        shouldEnterNumbers = false;
-                    } else if (fractionInSum == 2)
-                        shouldEnterNumbers = false;
-                    else if (fractionInSum == 3 && currentNumber.charAt(currentNumber.length() - 2) == '\'')
-                        shouldEnterNumbers = false;
-                }
-                break;
-            case R.id.button_frac :
-                if  (
-                        currentNumber.length() > 0 &&
-                        !contains(currentNumber, ',') &&
-                        currentNumber.charAt(currentNumber.length() - 1) != '-' &&
-                        currentNumber.charAt(currentNumber.length() - 1) != DEGREE &&
-                        currentNumber.charAt(currentNumber.length() - 1) != '\''
-                    ) {
-                    onClickNumber(view);
-                }
-                break;
-            case R.id.button_equal:
-                if (mNumbersList.size() < 2) break;
-                mNumbersList.clear();
-                mNumbersList.add(new DegreeNumber(resultText.getText().toString()));
-                currentNumber = new StringBuilder(resultText.getText());
-                mainText.setText(resultText.getText());
-                resultText.setText(mNumbersList.get(0).getRadians() + "рад");
-                break;
-            case R.id.button_plus :
-                if  (
-                        currentNumber.length() > 1 &&
-                            (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
-                             currentNumber.charAt(currentNumber.length() - 1) == '\'')
-                    ) {
-                    mNumbersList.add(new DegreeNumber());
-                    currentNumber = new StringBuilder();
-                    currentNumber.append(getResources().getString(R.string.plus));
-                    mainText.append(getResources().getString(R.string.plus));
-                    shouldEnterNumbers = true;
-                }
-                break;
-            case R.id.button_minus :
-                if (currentNumber.length() == 0) {
-                    currentNumber.append(getResources().getString(R.string.minus));
-                    mainText.append(getResources().getString(R.string.minus));
-                } else if
-                        (
-                            currentNumber.length() > 1 &&
-                                (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
-                                currentNumber.charAt(currentNumber.length() - 1) == '\'')
-                        ) {
-                    mNumbersList.add(new DegreeNumber());
-                    currentNumber = new StringBuilder();
-                    currentNumber.append(getResources().getString(R.string.minus));
-                    mainText.append(getResources().getString(R.string.minus));
-                    shouldEnterNumbers = true;
-                }
-                break;
-        }
-    }
+				}
+				break;
+			case R.id.button_minus :
+				switch (currentNumber.length()) {
+					case 0 :
+						currentNumber.append(getResources().getString(R.string.minus));
+						mainText.append(getResources().getString(R.string.minus));
+						break;
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+					default:
+						if (currentNumber.charAt(currentNumber.length() - 1) == DEGREE ||
+								currentNumber.charAt(currentNumber.length() - 1) == '\'') {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+							if (fractionTyped) {
+								fractionTyped = false;
+								if (getNumberOfChars(currentNumber, '\'') > 1){
+									fractionInSum = 2;
+								} else if (getNumberOfChars(currentNumber, '\'') == 1) {
+									fractionInSum = 1;
+								} else {
+									fractionInSum = 0;
+								}
+							}
+							mNumbersList.add(new DegreeNumber());
+							currentNumber = new StringBuilder();
+							currentNumber.append(getResources().getString(R.string.minus));
+							mainText.append(getResources().getString(R.string.minus));
+						}
+				}
+				break;
+		}
+	}
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.menu_main, menu);
+		return true;
+	}
 
-        return super.onOptionsItemSelected(item);
-    }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
 
+		//noinspection SimplifiableIfStatement
+		if (id == R.id.action_settings) {
+			startActivity(new Intent(this, SettingsActivity.class));
+			return true;
+		}
 
-    private boolean contains(StringBuilder string, char letter) {
-        for (char ch : string.toString().toCharArray())
-            if (ch == letter) return true;
-        return false;
-    }
-    private boolean contains(StringBuilder string, char[] letter) {
-        for (char ch : string.toString().toCharArray())
-            for (char arrayCh : letter)
-                if (ch == arrayCh) return true;
-        return false;
-    }
+		return super.onOptionsItemSelected(item);
+	}
 
-    private int getNumberOfChars(StringBuilder string, char letter) {
-        int i = 0;
-        for (char ch : string.toString().toCharArray())
-            if (ch == letter) i++;
-        return i;
-    }
+	private boolean addMinuteIfNeeded() {
+		/*
+		Два случая:
+			1. Когда введены минуты и секунды и поставлен первый апостроф
+			2. Когда введёна запятая и fractionInSum == 2
+		 */
+		return ((getNumberOfChars(currentNumber, '\'') == 2 &&
+				currentNumber.charAt(currentNumber.length() - 2) != '\'') ||
+				(contains(currentNumber, ',') && fractionInSum == 2));
+	}
+
+	private boolean canNumberTyped(String str, int fraction) {
+		ArrayList<String> st = new ArrayList<>();
+		switch (fraction) {
+			case 0 :
+				Pattern p = Pattern.compile("\\+?\\-?\\d*,?\\d*");
+				return p.matcher(str).matches();
+			case 1 :
+				st.add("\\+?\\-?\\d*");
+				st.add("\\+?\\-?(\\d+°)?[0-5]?[0-9](,\\d+)?");
+				break;
+			case 2 :
+				st.add("\\+?\\-?\\d*");
+				st.add("\\+?\\-?(\\d+°)?[0-5]?[0-9](,\\d+)?");
+				st.add("\\+?\\-?(\\d+°)?[0-5]?[0-9]\\'[0-5]?[0-9](,\\d+)?");
+				break;
+			case 3 :
+				st.add("\\+?\\-?\\d*,?\\d*");
+				st.add("\\+?\\-?(\\d+°)?[0-5]?[0-9](,\\d+)?");
+				st.add("\\+?\\-?(\\d+°)?[0-5]?[0-9]\\'[0-5]?[0-9](,\\d+)?");
+		}
+		for (String s : st)
+			if (Pattern.compile(s).matcher(str).matches())
+				return true;
+		return false;
+	}
+
+	// Возвращает bool значение - можно ли ввести знак "°"
+	private boolean canDegreeTyped(String str, int fraction) {
+		Pattern p;
+		if (fraction == 0 || fraction == 3) {
+			p = Pattern.compile("\\+?\\-?\\d+(,\\d+)?");
+		} else {
+			p = Pattern.compile("\\+?\\-?\\d+");
+		}
+		return p.matcher(str).matches();
+	}
+
+	// Возвращает bool значение - можно ли ввести знак "\'"
+	private boolean canMinuteTyped(String str, int fraction) {
+		Pattern p;
+		if (fraction == 2 || fraction == 3) {
+			p = Pattern.compile("\\+?\\-?(\\d+°)?([0-5]?[0-9]')?[0-5]?[0-9](,\\d+)?'?");
+		} else if (fraction == 1) {
+			p = Pattern.compile("\\+?\\-?(\\d+°)?[0-5]?[0-9](,\\d+)?");
+		} else {
+			return false;
+		}
+		return p.matcher(str).matches();
+	}
+
+	// Возвращает bool значение - можно ли ввести знак ","
+	private boolean canFractionTyped(String str, int fraction) {
+		Pattern p;
+		if (fraction == 0)
+			p = Pattern.compile("\\+?\\-?\\d+");
+		else if (fraction == 1)
+			p = Pattern.compile("\\+?\\-?(\\d+°)?[0-5]?[0-9]");
+		else if (fraction == 2)
+			p = Pattern.compile("\\+?\\-?(\\d+°)?([0-5]?[0-9]\')?[0-5]?[0-9]");
+		else {
+			for (int i = 0; i < 3; i++)
+				if (canFractionTyped(str, i))
+					return true;
+			return false;
+		}
+		return p.matcher(str).matches();
+	}
+
+	private boolean contains(StringBuilder string, char letter) {
+		for (char ch : string.toString().toCharArray())
+			if (ch == letter) return true;
+		return false;
+	}
+
+	private int getNumberOfChars(StringBuilder string, char letter) {
+		int i = 0;
+		for (char ch : string.toString().toCharArray())
+			if (ch == letter) i++;
+		return i;
+	}
 }

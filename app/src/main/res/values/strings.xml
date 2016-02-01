@@ -21,6 +21,6 @@
     <string name="plus">+</string>
     <string name="minus">-</string>
     <string name="settings">Настройки</string>
-    <string name="template_text">Шаблон для вывода ответа</string>
+    <string name="template_text">Выводить нули в ответе?</string>
     <string name="template">Шаблон</string>
 </resources>

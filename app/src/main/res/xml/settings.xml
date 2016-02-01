@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <ListPreference
+    <CheckBoxPreference
         android:key="@string/template_key_string"
         android:summary="@string/template_text"
         android:title="@string/template"
-        android:entries="@array/templates"
-        android:entryValues="@array/templates"
-        android:defaultValue="0"
-        android:dialogTitle="Выберите шаблон"/>
+        android:defaultValue="true"
+        />
     <ListPreference
         android:key="@string/text_size_key_string"
         android:title="Размер шрифта"
@@ -16,12 +14,4 @@
         android:entryValues="@array/text_size"
         android:defaultValue="0"
         android:dialogTitle="Размер шрифта" />
-    <ListPreference
-        android:key="@string/degree_number_key_string"
-        android:title="Формат"
-        android:summary="Установить формат ввода:"
-        android:entries="@array/degree_number"
-        android:entryValues="@array/degree_number"
-        android:defaultValue="0"
-        android:dialogTitle="Введённая вами строка 1,2' должна соотвествовать:" />
 </PreferenceScreen>
