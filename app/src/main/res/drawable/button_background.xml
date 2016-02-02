@@ -1,0 +1,15 @@
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+android:exitFadeDuration="@android:integer/config_mediumAnimTime">
+
+<item android:state_window_focused="false" android:drawable="@color/button_color" />
+
+<!-- Even though these two point to the same resource, have two states so the drawable will invalidate itself when coming out of pressed state. -->
+<item android:state_focused="true"  android:state_enabled="false" android:state_pressed="true" android:drawable="@color/button_color" />
+<item android:state_focused="true"  android:state_enabled="false"                              android:drawable="@color/button_color" />
+<item android:state_focused="true"                                android:state_pressed="true" android:drawable="@color/button_color_pre_pressed" />
+<item android:state_focused="false"                               android:state_pressed="true" android:drawable="@color/button_color_pre_pressed" />
+<item android:state_focused="true"                                                             android:drawable="@color/button_color_pressed" />
+<item android:drawable="@color/button_color" />
+
+</selector>

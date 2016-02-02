@@ -10,21 +10,18 @@ public class DegreeNumber {
 
     private static boolean toStringTemplate = true;
 
-    /**
-     * Первые два порядка - секунды
-     * Вторые два порядка - минуты
-     * Остальные - градусы
-     */
     private BigDecimal mNumber;
     private BigDecimal mDegrees;
     private BigDecimal mMinutes;
     private BigDecimal mSeconds;
 
+    private int mFraction;
 
     DegreeNumber() {
         mDegrees = new BigDecimal("0");
         mMinutes = new BigDecimal("0");
         mSeconds = new BigDecimal("0");
+        mFraction = 3;
     }
 
     DegreeNumber(String number) {
@@ -35,6 +32,10 @@ public class DegreeNumber {
         mDegrees = degrees;
         mMinutes = minutes;
         mSeconds = seconds;
+
+        if (hasFraction(mDegrees)) mFraction = 0;
+        else if (hasFraction(mMinutes)) mFraction = 1;
+        else if (hasFraction(mSeconds)) mFraction = 2;
     }
 
     public DegreeNumber add(DegreeNumber addedNumber) {
@@ -83,6 +84,11 @@ public class DegreeNumber {
         return result;
     }
 
+    public boolean hasFraction(BigDecimal a) {
+        return !(a.subtract(a.setScale(0, BigDecimal.ROUND_HALF_EVEN))
+                .compareTo(new BigDecimal("0")) == 0);
+    }
+
     public BigDecimal getDegrees() {
         return mDegrees;
     }
@@ -119,6 +125,9 @@ public class DegreeNumber {
                         mDegrees = mDegrees.subtract(new BigDecimal(currentNumber.toString()));
                     else
                         mDegrees = mDegrees.add(new BigDecimal(currentNumber.toString()));
+
+                    if (hasFraction(mDegrees)) mFraction = 0;
+
                     currentNumber = new StringBuilder();
 
                     break;
@@ -130,6 +139,9 @@ public class DegreeNumber {
                             mMinutes = mMinutes.subtract(new BigDecimal(currentNumber.toString()));
                         else
                             mMinutes = mMinutes.add(new BigDecimal(currentNumber.toString()));
+
+                        if (hasFraction(mMinutes)) mFraction = 1;
+
                         currentNumber = new StringBuilder();
                     } else if (number.charAt(i - 1) == '\'') {
                         // Добавляются секунды
@@ -137,6 +149,9 @@ public class DegreeNumber {
                             mSeconds = mSeconds.subtract(new BigDecimal(currentNumber.toString()));
                         else
                             mSeconds = mSeconds.add(new BigDecimal(currentNumber.toString()));
+
+                        if (hasFraction(mSeconds)) mFraction = 2;
+
                         currentNumber = new StringBuilder();
                     }
                     break;
@@ -182,9 +197,10 @@ public class DegreeNumber {
             builder.append(getDegrees());
             builder.append('°');
         }
-        if (mMinutes.compareTo(new BigDecimal("0")) != 0 ||
+        if (mFraction >= 1 &&
+                (mMinutes.compareTo(new BigDecimal("0")) != 0 ||
                 (mSeconds.compareTo(new BigDecimal("0")) != 0 && builder.length() > 0) ||
-                toStringTemplate) {
+                toStringTemplate)) {
             if (builder.length() > 0) {
                 builder.append(getMinutes());
             } else {
@@ -192,8 +208,9 @@ public class DegreeNumber {
             }
             builder.append('\'');
         }
-        if (mSeconds.compareTo(new BigDecimal("0")) != 0 ||
-                toStringTemplate) {
+        if (mFraction >= 2 &&
+                (mSeconds.compareTo(new BigDecimal("0")) != 0 ||
+                toStringTemplate)) {
             if (builder.length() > 0) {
                 builder.append(getSeconds());
             } else {

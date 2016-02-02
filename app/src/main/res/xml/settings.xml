@@ -12,6 +12,6 @@
         android:summary="Установить новый размер шрифта"
         android:entries="@array/text_size"
         android:entryValues="@array/text_size"
-        android:defaultValue="0"
+        android:defaultValue="1"
         android:dialogTitle="Размер шрифта" />
 </PreferenceScreen>

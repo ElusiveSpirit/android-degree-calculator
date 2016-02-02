@@ -22,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
 
 	public static final String TEMPLATE_KEY = "android.solleks.degreecalculator.TEMPLATE_KEY";
 	public static final String TEXT_SIZE_KEY = "android.solleks.degreecalculator.TEXT_SIZE_KEY";
-	public static final String DEGREE_NUMBER_KEY = "android.solleks.degreecalculator.DEGREE_NUMBER_KEY";
 
 	public static final char DEGREE	= '°';
 
@@ -31,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
 	private ArrayList<DegreeNumber> mNumbersList;
 	private StringBuilder currentNumber;
-	private DegreeNumber mResult;
 
 	/**
 	 * 0 в градусах
@@ -52,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 		mainText = (TextView) findViewById(R.id.textMain);
 		resultText = (TextView) findViewById(R.id.textResult);
 		Button button_C = (Button) findViewById(R.id.button_clear);
+		// Полное удаление введенных чисел
 		button_C.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
@@ -77,27 +76,30 @@ public class MainActivity extends AppCompatActivity {
 		super.onResume();
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+		// Установка шаблона вывода ответа
 		DegreeNumber.setToStringTemplate(preferences.getBoolean(TEMPLATE_KEY, true));
 
-		String text_size = preferences.getString(TEXT_SIZE_KEY, getResources().getStringArray(R.array.text_size)[0]);
-		float size =	getResources().getDimension(R.dimen.text_main_size);
-		if (text_size.equals(getResources().getStringArray(R.array.text_size)[1])) {
-			size =	getResources().getDimension(R.dimen.text_middle_size);
+		// Установка размера шрифта из настроек
+		String text_size = preferences.getString(TEXT_SIZE_KEY, getResources().getStringArray(R.array.text_size)[1]);
+		float size = getResources().getDimension(R.dimen.text_middle_size);
+		if (text_size.equals(getResources().getStringArray(R.array.text_size)[0])) {
+			size = getResources().getDimension(R.dimen.text_main_size);
 		} else if (text_size.equals(getResources().getStringArray(R.array.text_size)[2])) {
 			size =	getResources().getDimension(R.dimen.text_little_size);
 		}
 		mainText.setTextSize(size);
 		resultText.setTextSize(size);
 
-		/*if(preferences.getString(DEGREE_NUMBER_KEY, "").equals(getResources().getStringArray(R.array.degree_number)[1])) {
-			DegreeNumber.setToDegreeNumberTemplate(1);
-		} else {
-			DegreeNumber.setToDegreeNumberTemplate(0);
-		}*/
+		// Обновление ответа
 		if (mNumbersList.size() > 0)
 			setResultText();
 	}
 
+	/**
+	 * Запись в соответствующие переменные значение нажатой кнопки
+	 *
+	 * @param view - Нажатая кнопка
+	 */
 	public void onClickNumber(View view) {
 		Button button = (Button) view;
 
@@ -122,34 +124,30 @@ public class MainActivity extends AppCompatActivity {
 		setResultText();
 	}
 
+	/**
+	 * Выводит в resultText:
+	 * 		1. Сумму всех введенных чисел
+	 * 		2. Значение в радианах для одного числа
+	 * 		3. Пустую строку
+	 */
 	public void setResultText() {
-		int lastIndex = currentNumber.length() - 1;
-		int numberOfMinutes = getNumberOfChars(currentNumber, '\'');
 
-		// TODO Перенести эту дикость на регулярные выражения
-		if	(mNumbersList.size() > 1 &&
-				currentNumber.length() > 0 &&
-				(currentNumber.charAt(lastIndex) == DEGREE ||
-						(currentNumber.charAt(lastIndex) == '\'' &&
-								(numberOfMinutes == 1 ||
-										numberOfMinutes == 3 ||
-										(numberOfMinutes == 2 &&
-												currentNumber.charAt(lastIndex - 1) == '\''))))
-				) {
+		if	(mNumbersList.size() > 1 && isCorrectNumber(currentNumber.toString())) {
+
 			mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
-			mResult = mNumbersList.get(0);
+			DegreeNumber mResult = mNumbersList.get(0);
 			// Суммирование чисел
 			for (int i = 1; i < mNumbersList.size(); i++)
 				mResult = mResult.add(mNumbersList.get(i));
 			// Вывод результата
 			resultText.setText(mResult.toString());
-		} else if (mNumbersList.size() == 1 &&
-					currentNumber.length() > 0 &&
-					(currentNumber.charAt(lastIndex) == DEGREE ||
-							currentNumber.charAt(lastIndex) == '\'')) {
+
+		} else if (mNumbersList.size() == 1 && isCorrectNumber(currentNumber.toString())) {
+
 			// Если введено лишь одно число, то происходит вывод радиального значения
 			mNumbersList.set(mNumbersList.size() - 1, new DegreeNumber(currentNumber.toString()));
 			resultText.setText(String.format("%sрад", mNumbersList.get(0).getRadians()));
+
 		} else {
 			resultText.setText("");
 		}
@@ -163,7 +161,8 @@ public class MainActivity extends AppCompatActivity {
 					// Стирание последнего символа
 					str = str.substring(0, str.length() - 1);
 					// Также стирается ещё один символ апострофа, если это были секунды
-					if (getNumberOfChars(new StringBuilder(str), '\'') == 2)
+					if (getNumberOfChars(currentNumber, '\'') == 3 ||
+							(fractionInSum == 2 && getNumberOfChars(currentNumber, '\'') == 2))
 						str = str.substring(0, str.length() - 1);
 					// Происходит затирание и перезапись чисел
 					mNumbersList.clear();
@@ -294,12 +293,8 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 
-		//noinspection SimplifiableIfStatement
 		if (id == R.id.action_settings) {
 			startActivity(new Intent(this, SettingsActivity.class));
 			return true;
@@ -308,12 +303,27 @@ public class MainActivity extends AppCompatActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	/**
+	 * @param str - Строка с числом
+	 * @return - возвращает true, если число подходит под шаблон
+	 */
+	private boolean isCorrectNumber(String str) {
+		return str.length() > 0 &&
+				str.matches("\\+?\\-?" +
+				"(\\d+(,\\d+)?°)?" +
+				"([0-5]?[0-9](,\\d+)?')?" +
+				"([0-5]?[0-9](,\\d+)?'')?");
+	}
+
+
+	/**
+	 * Два случая:
+	 	1. Когда введены минуты и секунды и поставлен первый апостроф
+	 	2. Когда введёна запятая и fractionInSum == 2
+	 *
+	 * @return Возвращает true, если необходимо добавить символ минуты
+	 */
 	private boolean addMinuteIfNeeded() {
-		/*
-		Два случая:
-			1. Когда введены минуты и секунды и поставлен первый апостроф
-			2. Когда введёна запятая и fractionInSum == 2
-		 */
 		return ((getNumberOfChars(currentNumber, '\'') == 2 &&
 				currentNumber.charAt(currentNumber.length() - 2) != '\'') ||
 				(contains(currentNumber, ',') && fractionInSum == 2));
