@@ -36,6 +36,7 @@ public class DegreeNumber {
         if (hasFraction(mDegrees)) mFraction = 0;
         else if (hasFraction(mMinutes)) mFraction = 1;
         else if (hasFraction(mSeconds)) mFraction = 2;
+        else mFraction = 3;
     }
 
     public DegreeNumber add(DegreeNumber addedNumber) {
@@ -114,6 +115,7 @@ public class DegreeNumber {
         mDegrees = new BigDecimal("0");
         mMinutes = new BigDecimal("0");
         mSeconds = new BigDecimal("0");
+        mFraction = 3;
 
         boolean isMinutesAdded = false;
         boolean isMinus = false;

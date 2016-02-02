@@ -31,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
 	private ArrayList<DegreeNumber> mNumbersList;
 	private StringBuilder currentNumber;
 
-	/**
+	/** int fractionInSum
+	 *
 	 * 0 в градусах
 	 * 1 в минутах
 	 * 2 в секундах
@@ -41,6 +42,14 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	private int fractionInSum;
 	private boolean fractionTyped;
+
+	/** int minFraction
+	 *
+	 * 0 градусы
+	 * 1 минуты
+	 * 2 секунды
+	 */
+	private int minFraction;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
 				mainText.setText("");
 				resultText.setText("");
 				fractionInSum = 3;
+				fractionTyped = false;
+				minFraction = 0;
 				return true;
 			}
 		});
@@ -69,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
 		currentNumber = new StringBuilder();
 		fractionInSum = 3;
 		fractionTyped = false;
+		minFraction = 0;
 	}
 
 	@Override
@@ -162,12 +174,15 @@ public class MainActivity extends AppCompatActivity {
 					str = str.substring(0, str.length() - 1);
 					// Также стирается ещё один символ апострофа, если это были секунды
 					if (getNumberOfChars(currentNumber, '\'') == 3 ||
-							(fractionInSum == 2 && getNumberOfChars(currentNumber, '\'') == 2))
+							((fractionInSum == 2 || (minFraction == 2 &&
+									contains(currentNumber, ',')))
+									&& getNumberOfChars(currentNumber, '\'') == 2))
 						str = str.substring(0, str.length() - 1);
 					// Происходит затирание и перезапись чисел
 					mNumbersList.clear();
 					currentNumber = new StringBuilder();
 					fractionInSum = 3;
+					minFraction = 0;
 					char ch;
 					for (int i = 0; i < str.length(); i++) {
 						ch = str.charAt(i);
@@ -187,12 +202,24 @@ public class MainActivity extends AppCompatActivity {
 										fractionInSum = 1;
 								}
 							}
+							// Установка значения minFraction
+							if (getNumberOfChars(currentNumber, '\'') == 3 ||
+									getNumberOfChars(currentNumber, '\'') == 2)
+								minFraction = Math.max(minFraction, 2);
+							else if (getNumberOfChars(currentNumber, '\'') == 1)
+								minFraction = Math.max(minFraction, 1);
 
 							currentNumber = new StringBuilder();
 						}
 						if (ch != '+')
 							currentNumber.append(str.charAt(i));
 					}
+					// Установка значения minFraction для последнего значения
+					if (getNumberOfChars(currentNumber, '\'') == 3 ||
+							getNumberOfChars(currentNumber, '\'') == 2)
+						minFraction = Math.max(minFraction, 2);
+					else if (getNumberOfChars(currentNumber, '\'') == 1)
+						minFraction = Math.max(minFraction, 1);
 
 					mainText.setText(str);
 					mNumbersList.add(new DegreeNumber(currentNumber.toString()));
@@ -213,6 +240,15 @@ public class MainActivity extends AppCompatActivity {
 					// Если удовлетворяет описанным ниже случаям, то добавить ещё один апостроф
 					if (addMinuteIfNeeded())
 						onClickNumber(view);
+					// Установка minFraction
+					if (getNumberOfChars(currentNumber, '\'') == 1) {
+						if (minFraction == 0) {
+							minFraction = 1;
+						}
+					} else {
+						if (!contains(currentNumber, ','))
+							minFraction = 2;
+					}
 				}
 				break;
 			case R.id.button_frac :
@@ -320,13 +356,14 @@ public class MainActivity extends AppCompatActivity {
 	 * Два случая:
 	 	1. Когда введены минуты и секунды и поставлен первый апостроф
 	 	2. Когда введёна запятая и fractionInSum == 2
+	 	3. Когда введёна запятая и minFraction == 2
 	 *
 	 * @return Возвращает true, если необходимо добавить символ минуты
 	 */
 	private boolean addMinuteIfNeeded() {
 		return ((getNumberOfChars(currentNumber, '\'') == 2 &&
 				currentNumber.charAt(currentNumber.length() - 2) != '\'') ||
-				(contains(currentNumber, ',') && fractionInSum == 2));
+				(contains(currentNumber, ',') && (fractionInSum == 2 || minFraction == 2 )));
 	}
 
 	private boolean canNumberTyped(String str, int fraction) {
@@ -358,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
 	// Возвращает bool значение - можно ли ввести знак "°"
 	private boolean canDegreeTyped(String str, int fraction) {
 		Pattern p;
-		if (fraction == 0 || fraction == 3) {
+		if ((fraction == 0 || fraction == 3) && minFraction == 0) {
 			p = Pattern.compile("\\+?\\-?\\d+(,\\d+)?");
 		} else {
 			p = Pattern.compile("\\+?\\-?\\d+");
@@ -372,7 +409,11 @@ public class MainActivity extends AppCompatActivity {
 		if (fraction == 2 || fraction == 3) {
 			p = Pattern.compile("\\+?\\-?(\\d+°)?([0-5]?[0-9]')?[0-5]?[0-9](,\\d+)?'?");
 		} else if (fraction == 1) {
-			p = Pattern.compile("\\+?\\-?(\\d+°)?[0-5]?[0-9](,\\d+)?");
+			if (minFraction == 2) {
+				p = Pattern.compile("\\+?\\-?(\\d+°)?[0-5]?[0-9]?");
+			} else {
+				p = Pattern.compile("\\+?\\-?(\\d+°)?[0-5]?[0-9](,\\d+)?");
+			}
 		} else {
 			return false;
 		}
