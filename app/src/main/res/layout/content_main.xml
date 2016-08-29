@@ -8,7 +8,9 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:background="@color/white"
+        android:elevation="1dp">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -22,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:padding="@dimen/text_main_padding"
                 android:textSize="@dimen/text_main_size"
-                android:id="@+id/textMain"/>
+                android:id="@+id/textMain" />
         </ScrollView>
 
         <ScrollView
@@ -49,7 +51,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="2"
-        android:background="@color/colorPrimary">
+        android:background="@color/AltColorPrimary"
+        android:elevation="15dp"
+        android:focusable="true">
 
         <TableLayout
             android:layout_width="wrap_content"
@@ -62,21 +66,23 @@
                     android:text="@string/one"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme" />
+                    android:layout_marginBottom="1dp"
+                    android:layout_marginRight="1dp"/>
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="@string/two"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme" />
+                    android:layout_marginBottom="1dp"
+                    android:layout_marginRight="1dp" />
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="@string/three"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme"/>
+                    android:layout_marginBottom="1dp"/>
             </TableRow>
             <TableRow android:layout_weight="1">
                 <Button
@@ -85,21 +91,23 @@
                     android:text="@string/four"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme"/>
+                    android:layout_marginBottom="1dp"
+                    android:layout_marginRight="1dp"/>
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="@string/five"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme" />
+                    android:layout_marginBottom="1dp"
+                    android:layout_marginRight="1dp" />
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="@string/six"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme"/>
+                    android:layout_marginBottom="1dp"/>
             </TableRow>
             <TableRow android:layout_weight="1">
                 <Button
@@ -108,21 +116,23 @@
                     android:text="@string/seven"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme"/>
+                    android:layout_marginBottom="1dp"
+                    android:layout_marginRight="1dp"/>
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="@string/eight"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme"/>
+                    android:layout_marginBottom="1dp"
+                    android:layout_marginRight="1dp"/>
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="@string/nine"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme" />
+                    android:layout_marginBottom="1dp" />
             </TableRow>
             <TableRow android:layout_weight="1"
                 android:layout_gravity="top">
@@ -133,22 +143,21 @@
                     android:text="@string/comma"
                     android:onClick="onClick"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme" />
+                    android:layout_marginRight="1dp" />
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="@string/zero"
                     android:onClick="onClickNumber"
                     android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme" />
+                    android:layout_marginRight="1dp"  />
                 <Button
                     android:id="@+id/button_equal"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="@string/equal"
                     android:onClick="onClick"
-                    android:textSize="@dimen/main_text_size"
-                    style="@style/ButtonTheme" />
+                    android:textSize="@dimen/main_text_size" />
             </TableRow>
 
         </TableLayout>
@@ -167,7 +176,8 @@
                 android:layout_weight="1"
                 android:textSize="@dimen/main_text_size"
                 android:longClickable="false"
-                style="@style/ButtonTheme"/>
+                android:layout_marginLeft="1dp"
+                android:layout_marginBottom="1dp" />
             <Button
                 android:id="@+id/button_degree"
                 android:layout_width="match_parent"
@@ -176,7 +186,8 @@
                 android:onClick="onClick"
                 android:layout_weight="1"
                 android:textSize="@dimen/main_text_size"
-                style="@style/ButtonTheme" />
+                android:layout_marginLeft="1dp"
+                android:layout_marginBottom="1dp" />
             <Button
                 android:id="@+id/button_minute"
                 android:layout_width="match_parent"
@@ -185,7 +196,8 @@
                 android:onClick="onClick"
                 android:layout_weight="1"
                 android:textSize="@dimen/main_text_size"
-                style="@style/ButtonTheme" />
+                android:layout_marginLeft="1dp"
+                android:layout_marginBottom="1dp" />
             <Button
                 android:id="@+id/button_plus"
                 android:layout_width="match_parent"
@@ -194,7 +206,8 @@
                 android:onClick="onClick"
                 android:layout_weight="1"
                 android:textSize="@dimen/main_text_size"
-                style="@style/ButtonTheme"/>
+                android:layout_marginLeft="1dp"
+                android:layout_marginBottom="1dp"/>
             <Button
                 android:id="@+id/button_minus"
                 android:layout_width="match_parent"
@@ -203,7 +216,7 @@
                 android:onClick="onClick"
                 android:layout_weight="1"
                 android:textSize="@dimen/main_text_size"
-                style="@style/ButtonTheme"/>
+                android:layout_marginLeft="1dp" />
 
         </LinearLayout>
     </LinearLayout>

@@ -6,13 +6,24 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:buttonStyle">@style/ButtonTheme</item>
     </style>
 
-    <style name="ButtonTheme">
-        <item name="android:buttonStyle">?android:attr/borderlessButtonStyle</item>
+    <style name="ButtonTheme" parent="Base.Widget.AppCompat.Button.Borderless">
         <item name="android:background">@drawable/button_background</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:layout_margin">1sp</item>
+    </style>
+
+    <style name="AltAppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/AltColorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/AltColorPrimary</item>
+        <item name="colorAccent">@color/AltColorAccent</item>
+        <item name="android:buttonStyle">@style/AltButtonTheme</item>
+    </style>
+
+    <style name="AltButtonTheme" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@color/white</item>
+        <item name="android:textColor">@color/button_color_pre_pressed</item>
     </style>
 
 </resources>

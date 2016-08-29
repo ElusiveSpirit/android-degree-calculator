@@ -5,12 +5,12 @@ import java.math.BigDecimal;
 /**
  * Created by Константин on 13.12.2015.
  *
+ * Класс для хранения и обработки чисел градусной меры
  */
 public class DegreeNumber {
 
     private static boolean toStringTemplate = true;
 
-    private BigDecimal mNumber;
     private BigDecimal mDegrees;
     private BigDecimal mMinutes;
     private BigDecimal mSeconds;
@@ -169,15 +169,6 @@ public class DegreeNumber {
         }
     }
 
-
-    public BigDecimal getNumber() {
-        return mNumber;
-    }
-
-    public String getNumberAsText() {
-        return mNumber.toString();
-    }
-
     public String getRadians() {
         BigDecimal resultD = getDegrees()
                 .multiply(new BigDecimal(String.valueOf(Math.PI)))
@@ -232,8 +223,5 @@ public class DegreeNumber {
         DegreeNumber.toStringTemplate = toStringTemplate;
     }
 
-    public static boolean getToStringTemplate() {
-        return toStringTemplate;
-    }
 }
 
